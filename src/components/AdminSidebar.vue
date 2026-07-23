@@ -42,6 +42,16 @@
         </span>
         Reports
       </RouterLink>
+
+      <RouterLink to="/admin/detail-survey" class="nav-item" active-class="active">
+        <span class="nav-icon-box">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6" />
+            <path d="M7 10.5l2 2 4-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        Detail Survey
+      </RouterLink>
     </nav>
 
     <div class="sidebar-footer">

@@ -45,6 +45,12 @@ const routes = [
         component: () => import("../adminReport.vue"),
         meta: { title: "Laporan" },
       },
+      {
+        path: "detail-survey",
+        name: "admin-detail-survey",
+        component: () => import("../adminDetailSurvey.vue"),
+        meta: { title: "Detail Survey" },
+      },
     ],
   },
   {

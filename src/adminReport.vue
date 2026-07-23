@@ -20,65 +20,20 @@
               </p>
             </div>
             <div class="card-header-actions">
-              <div class="date-filter">
-                <div class="date-segment">
-                  <svg
-                    class="date-segment-icon"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    @click="openPicker(dateFromInput)"
-                  >
-                    <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  </svg>
-                  <input
-                    ref="dateFromInput"
-                    v-model="dateFrom"
-                    type="date"
-                    class="date-input"
-                    :max="dateTo || undefined"
-                  />
-                  <span v-if="!dateFrom" class="date-placeholder" @click="openPicker(dateFromInput)">
-                    Input Tanggal
-                  </span>
-                </div>
-                <svg class="date-filter-arrow" width="14" height="14" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <div class="survey-filter">
+                <svg class="survey-filter-icon" width="14" height="14" viewBox="0 0 20 20" fill="none">
+                  <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
-                <div class="date-segment">
-                  <svg
-                    class="date-segment-icon"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    @click="openPicker(dateToInput)"
-                  >
-                    <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  </svg>
-                  <input
-                    ref="dateToInput"
-                    v-model="dateTo"
-                    type="date"
-                    class="date-input"
-                    :min="dateFrom || undefined"
-                  />
-                  <span v-if="!dateTo" class="date-placeholder" @click="openPicker(dateToInput)">
-                    Input Tanggal
-                  </span>
-                </div>
-                <button
-                  v-if="dateFrom || dateTo"
-                  type="button"
-                  class="date-filter-clear"
-                  title="Tampilkan semua tanggal"
-                  @click="dateFrom = ''; dateTo = ''"
-                >
-                  &times;
-                </button>
+                <select v-model="selectedSurveyFilterId" class="survey-filter-select">
+                  <option :value="null">Semua Survey</option>
+                  <option v-for="survey in store.surveys" :key="survey.id" :value="survey.id">
+                    {{ survey.nama }}
+                  </option>
+                </select>
+                <span v-if="selectedSurveyFilterRange" class="survey-filter-range">
+                  {{ selectedSurveyFilterRange }}
+                </span>
               </div>
             </div>
           </div>
@@ -111,13 +66,6 @@
                     <td>{{ dateTable.pageStart.value + index + 1 }}</td>
                     <td>
                       <div class="cell-date">{{ formatDate(row.key) }}</div>
-                      <button
-                        type="button"
-                        class="link-belum-survey"
-                        @click="toggleBelumSurvey(row.key)"
-                      >
-                        Pegawai belum survey
-                      </button>
                     </td>
                     <td>{{ row.pegawaiOrganik }}</td>
                     <td>{{ row.pegawaiNonOrganik }}</td>
@@ -139,11 +87,6 @@
                       <span class="percent-value" :class="percentValueClass(row.persenTotal)">
                         {{ row.persenTotal }}%
                       </span>
-                    </td>
-                  </tr>
-                  <tr v-if="expandedDate === row.key" class="expand-row">
-                    <td colspan="11">
-                      <BelumSurveyTable :employees="store.employeesBelumSurveyOnDate(row.key)" />
                     </td>
                   </tr>
                 </template>
@@ -306,46 +249,39 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import BelumSurveyTable from "./components/BelumSurveyTable.vue";
 import { useSurveyStore } from "./stores/surveyStore";
 
 const store = useSurveyStore();
 
 onMounted(() => store.ensureBaseData());
 
-const dateFrom = ref("");
-const dateTo = ref("");
-const dateFromInput = ref(null);
-const dateToInput = ref(null);
-const expandedDate = ref(null);
+const selectedSurveyFilterId = ref(null);
 
-function toggleBelumSurvey(tanggal) {
-  expandedDate.value = expandedDate.value === tanggal ? null : tanggal;
-}
+const selectedSurveyFilter = computed(() =>
+  selectedSurveyFilterId.value ? store.findSurvey(selectedSurveyFilterId.value) : null
+);
 
-function openPicker(inputEl) {
-  if (!inputEl) return;
-  if (typeof inputEl.showPicker === "function") {
-    inputEl.showPicker();
-  } else {
-    inputEl.focus();
-  }
-}
-
-const filteredSubmissions = computed(() => {
-  if (!dateFrom.value && !dateTo.value) return store.submissions;
-  return store.submissions.filter((s) => {
-    if (dateFrom.value && s.tanggal < dateFrom.value) return false;
-    if (dateTo.value && s.tanggal > dateTo.value) return false;
-    return true;
-  });
+const selectedSurveyFilterRange = computed(() => {
+  const survey = selectedSurveyFilter.value;
+  if (!survey || !survey.tanggalMulai || !survey.tanggalSelesai) return "";
+  return `${formatDate(survey.tanggalMulai)} - ${formatDate(survey.tanggalSelesai)}`;
 });
 
-function useParticipationTable(getKey, { pageSize = 3, sort } = {}) {
+const filteredSubmissions = computed(() => {
+  const survey = selectedSurveyFilter.value;
+  if (!survey) return store.submissions;
+  return store.submissions.filter((s) => s.surveyId === survey.id);
+});
+
+function useParticipationTable(getKey, { pageSize = 3, sort, allKeys } = {}) {
   const page = ref(1);
 
   const rows = computed(() => {
-    const list = store.participationGroupedBy(getKey, filteredSubmissions.value);
+    const list = store.participationGroupedBy(
+      getKey,
+      filteredSubmissions.value,
+      allKeys?.value ?? allKeys
+    );
     return sort ? [...list].sort(sort) : list;
   });
 
@@ -393,6 +329,7 @@ const dateTable = useParticipationTable((s) => s.tanggal, {
 const deptTable = useParticipationTable((s) => s.departemen, {
   pageSize: 10,
   sort: (a, b) => (a.key < b.key ? -1 : 1),
+  allKeys: computed(() => store.departments),
 });
 
 function percentValueClass(value) {
@@ -478,10 +415,10 @@ function formatDate(isoDate) {
   flex-wrap: wrap;
 }
 
-.date-filter {
+.survey-filter {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   height: 40px;
   padding: 0 14px;
   border: 1px solid var(--color-border-strong);
@@ -490,89 +427,39 @@ function formatDate(isoDate) {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.date-filter:hover {
+.survey-filter:hover {
   border-color: var(--color-primary-light);
 }
 
-.date-filter:focus-within {
+.survey-filter:focus-within {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(0, 93, 172, 0.15);
 }
 
-.date-filter-arrow {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
-.date-segment {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  gap: 6px;
-}
-
-.date-segment-icon {
-  position: relative;
-  z-index: 2;
+.survey-filter-icon {
   color: var(--color-primary);
   flex-shrink: 0;
-  cursor: pointer;
 }
 
-.date-input {
+.survey-filter-select {
   border: none;
   outline: none;
-  width: 90px;
+  min-width: 200px;
+  max-width: 280px;
   height: 100%;
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--color-text-secondary);
   background: transparent;
-}
-
-.date-input::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  -webkit-appearance: none;
-}
-
-.date-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 13px;
   cursor: pointer;
 }
 
-.date-filter-clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
+.survey-filter-range {
+  font-size: 12px;
   color: var(--color-text-muted);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.date-filter-clear:hover {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-}
-
-.date-filter-clear:hover {
-  color: var(--color-danger);
+  white-space: nowrap;
+  padding-left: 8px;
+  border-left: 1px solid var(--color-border);
 }
 
 .table-scroll {
@@ -644,29 +531,6 @@ function formatDate(isoDate) {
 
 .cell-date {
   color: var(--color-text);
-}
-
-.link-belum-survey {
-  display: block;
-  margin-top: 2px;
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: var(--color-primary);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-}
-
-.link-belum-survey:hover {
-  text-decoration: underline;
-}
-
-.expand-row td {
-  background-color: var(--color-bg);
-  text-align: left;
-  padding: 16px 20px;
 }
 
 .total-row td {

@@ -68,6 +68,7 @@ export const useSurveyStore = defineStore("survey", {
     surveys: [],
     submissions: [],
     employees: [],
+    departments: [],
     notifications: [],
     workforceTotals: { Organik: 0, "Non-Organik": 0 },
     lastSubmission: null,
@@ -109,6 +110,13 @@ export const useSurveyStore = defineStore("survey", {
       return state.employees.filter((e) => !submittedNames.has(e.nama));
     },
 
+    employeesBelumSurveyForSurvey: (state) => (surveyId) => {
+      const submittedNames = new Set(
+        state.submissions.filter((s) => s.surveyId === surveyId).map((s) => s.nama)
+      );
+      return state.employees.filter((e) => !submittedNames.has(e.nama));
+    },
+
     submissionsBySurvey: (state) => (surveyId) =>
       state.submissions.filter((s) => s.surveyId === surveyId),
 
@@ -117,13 +125,18 @@ export const useSurveyStore = defineStore("survey", {
     unreadNotificationCount: (state) => state.notifications.filter((n) => !n.read).length,
 
     participationGroupedBy(state) {
-      return (getKey, submissionsList) => {
+      return (getKey, submissionsList, allKeys) => {
         const list = submissionsList ?? state.submissions;
         const totalOrganik = state.workforceTotals.Organik;
         const totalNonOrganik = state.workforceTotals["Non-Organik"];
         const totalPegawai = totalOrganik + totalNonOrganik;
 
         const grouped = new Map();
+        if (allKeys) {
+          for (const key of allKeys) {
+            grouped.set(key, { organik: 0, nonOrganik: 0 });
+          }
+        }
         for (const submission of list) {
           const key = getKey(submission);
           if (!grouped.has(key)) {
@@ -174,6 +187,12 @@ export const useSurveyStore = defineStore("survey", {
       this.employees = data.map(mapEmployee);
     },
 
+    async fetchDepartments() {
+      const { data, error } = await supabase.from("departments").select("*").order("nama");
+      if (error) throw error;
+      this.departments = data.map((row) => row.nama);
+    },
+
     async fetchWorkforceTotals() {
       const { data, error } = await supabase.from("workforce_totals").select("*");
       if (error) throw error;
@@ -200,6 +219,7 @@ export const useSurveyStore = defineStore("survey", {
       await Promise.all([
         this.fetchSurveys(),
         this.fetchEmployees(),
+        this.fetchDepartments(),
         this.fetchSubmissions(),
         this.fetchWorkforceTotals(),
       ]);
