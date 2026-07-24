@@ -21,21 +21,23 @@
             </select>
 
             <div v-if="selectedSurvey" class="survey-meta">
-              <span v-if="selectedEmployee" class="quota-badge" :class="quotaBadgeClass">
-                Kamu sudah isi {{ employeeSubmissionCount }}/{{ selectedSurvey.maxPengisian }} kali
-              </span>
-              <span v-else class="quota-badge quota-ok">
-                Maks {{ selectedSurvey.maxPengisian }}x per pegawai
-              </span>
               <a
                 v-if="selectedSurvey.link"
-                class="survey-link"
+                class="survey-link-button"
                 :href="selectedSurvey.link"
                 target="_blank"
                 rel="noopener"
-                @click="() => console.log('Link clicked:', selectedSurvey.link)"
               >
-                Buka Link
+                <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M8.5 11.5 11.5 8.5M9 6l.6-.6a3 3 0 0 1 4.2 4.2L13 10.4M11 14l-.6.6a3 3 0 0 1-4.2-4.2L7 9.6"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Buka Link Survey
               </a>
               <span v-else class="survey-link-empty">Link belum tersedia</span>
             </div>
@@ -85,6 +87,9 @@
                 Nama tidak ditemukan di data pegawai.
               </p>
             </div>
+            <p v-if="selectedEmployee && selectedSurvey" class="name-quota-info" :class="quotaBadgeClass">
+              Anda sudah mengisi survey sebanyak {{ employeeSubmissionCount }} / {{ selectedSurvey.maxPengisian }}
+            </p>
           </div>
 
           <div class="field">
@@ -117,7 +122,16 @@
               </template>
             </div>
             <p v-if="quotaFull" class="field-error">
-              Kamu sudah mencapai batas maksimal pengisian survey ini ({{ selectedSurvey?.maxPengisian }} kali).
+              <svg class="field-error-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M10 2 2 17h16L10 2Z"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                />
+                <path d="M10 8v4M10 14.5v.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              Anda sudah mencapai batas maksimal pengisian survey ini ({{ selectedSurvey?.maxPengisian }} kali).
             </p>
           </div>
 
@@ -450,37 +464,54 @@ async function handleSubmit() {
 .survey-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
-.quota-badge {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
+.name-quota-info {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 
-.quota-ok {
+.name-quota-info.quota-ok {
   background-color: var(--color-success-bg);
   color: var(--color-success);
 }
 
-.quota-warning {
+.name-quota-info.quota-warning {
   background-color: var(--color-warning-bg);
   color: var(--color-warning);
 }
 
-.quota-full {
+.name-quota-info.quota-full {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
 }
 
-.survey-link {
-  color: var(--color-primary);
+.survey-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: #ffffff;
   font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 93, 172, 0.3);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.survey-link-button:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: 0 3px 10px rgba(0, 93, 172, 0.4);
+}
+
+.survey-link-button:active {
+  transform: translateY(1px);
 }
 
 .survey-link-empty {
@@ -542,9 +573,21 @@ async function handleSubmit() {
 }
 
 .field-error {
-  color: var(--color-danger);
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-danger-bg);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.field-error-icon {
+  flex-shrink: 0;
 }
 
 .submit-button {

@@ -58,6 +58,14 @@
             <button
               type="button"
               class="toggle-option"
+              :class="{ active: statusFilter === 'sudah' }"
+              @click="statusFilter = 'sudah'; page = 1"
+            >
+              Sudah Mengisi
+            </button>
+            <button
+              type="button"
+              class="toggle-option"
               :class="{ active: statusFilter === 'belum' }"
               @click="statusFilter = 'belum'; page = 1"
             >
@@ -193,6 +201,8 @@ const filteredEmployees = computed(() => {
 
   if (statusFilter.value === "belum") {
     list = list.filter((e) => fillCountFor(e) === 0);
+  } else if (statusFilter.value === "sudah") {
+    list = list.filter((e) => fillCountFor(e) > 0);
   }
 
   const term = search.value.trim().toLowerCase();
