@@ -322,7 +322,11 @@ function formatNotifTime(isoString) {
   padding: 10px 12px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.notif-item:active {
+  transform: scale(0.97);
 }
 
 .notif-item:hover {

@@ -306,6 +306,41 @@ async function handleSaveDraft() {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: field-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.section:nth-of-type(1) {
+  animation-delay: 0.16s;
+}
+
+.section:nth-of-type(2) {
+  animation-delay: 0.24s;
+}
+
+.section:nth-of-type(3) {
+  animation-delay: 0.32s;
+}
+
+.form-footer {
+  animation: field-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.4s;
+}
+
+@keyframes field-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section,
+  .form-footer {
+    animation: none !important;
+  }
 }
 
 .section-label {

@@ -1,15 +1,20 @@
 <template>
   <div class="login-page">
+    <div class="bg-blob bg-blob-1" aria-hidden="true" />
+    <div class="bg-blob bg-blob-2" aria-hidden="true" />
+    <div class="bg-blob bg-blob-3" aria-hidden="true" />
+    <div class="bg-blob bg-blob-4" aria-hidden="true" />
+
     <AppHeader />
 
     <main class="main-content">
-      <form class="card" @submit.prevent="handleSubmit">
+      <form class="card" :class="{ shake: shakeError }" @submit.prevent="handleSubmit">
         <div class="card-heading">
           <h1 class="card-title">Login Admin</h1>
           <p class="card-subtitle">Masuk untuk mengakses Survey Central.</p>
         </div>
 
-        <div class="field">
+        <div class="field field-1">
           <label class="field-label" for="email">Email</label>
           <input
             id="email"
@@ -22,7 +27,7 @@
           />
         </div>
 
-        <div class="field">
+        <div class="field field-2">
           <label class="field-label" for="password">Password</label>
           <input
             id="password"
@@ -35,7 +40,8 @@
           />
         </div>
 
-        <button type="submit" class="submit-button" :disabled="loading">
+        <button type="submit" class="submit-button field-3" :disabled="loading">
+          <span v-if="loading" class="spinner" aria-hidden="true" />
           {{ loading ? "Memproses..." : "Masuk" }}
         </button>
       </form>
@@ -57,6 +63,7 @@ const router = useRouter();
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
+const shakeError = ref(false);
 
 async function handleSubmit() {
   loading.value = true;
@@ -65,6 +72,10 @@ async function handleSubmit() {
     router.push("/admin/management");
   } catch (err) {
     toast.show(err.message || "Email atau password salah.", "error");
+    shakeError.value = true;
+    setTimeout(() => {
+      shakeError.value = false;
+    }, 420);
   } finally {
     loading.value = false;
   }
@@ -73,10 +84,81 @@ async function handleSubmit() {
 
 <style scoped>
 .login-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--color-bg);
+}
+
+.bg-blob {
+  position: absolute;
+  z-index: -1;
+  width: 46vw;
+  height: 46vw;
+  max-width: 560px;
+  max-height: 560px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.6;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.bg-blob-1 {
+  top: -12%;
+  left: -10%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-1 20s ease-in-out infinite;
+}
+
+.bg-blob-2 {
+  top: 50%;
+  left: -14%;
+  background: rgba(152, 240, 255, 1);
+  animation: blob-float-2 24s ease-in-out infinite;
+}
+
+.bg-blob-3 {
+  top: -14%;
+  right: -10%;
+  background: rgba(92, 233, 254, 1);
+  animation: blob-float-3 22s ease-in-out infinite;
+}
+
+.bg-blob-4 {
+  bottom: -16%;
+  right: -8%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-4 26s ease-in-out infinite;
+}
+
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, 4vh) scale(1.12); }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4vw, -6vh) scale(1.08); }
+}
+
+@keyframes blob-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5vw, 5vh) scale(1.1); }
+}
+
+@keyframes blob-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, -4vh) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob {
+    animation: none;
+  }
 }
 
 .main-content {
@@ -98,6 +180,72 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: card-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.card.shake {
+  animation: shake 0.42s ease-in-out;
+}
+
+.card-heading,
+.field-1,
+.field-2,
+.field-3 {
+  animation: field-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.card-heading {
+  animation-delay: 0.05s;
+}
+
+.field-1 {
+  animation-delay: 0.12s;
+}
+
+.field-2 {
+  animation-delay: 0.19s;
+}
+
+.field-3 {
+  animation-delay: 0.26s;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes field-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card-heading,
+  .field-1,
+  .field-2,
+  .field-3,
+  .card.shake {
+    animation: none !important;
+  }
 }
 
 .card-heading {
@@ -140,12 +288,14 @@ async function handleSubmit() {
   font-size: 14px;
   color: var(--color-text);
   background-color: var(--color-surface);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 93, 172, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 93, 172, 0.16);
+  transform: translateY(-1px);
 }
 
 .submit-button {
@@ -158,15 +308,42 @@ async function handleSubmit() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .submit-button:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
+  box-shadow: 0 4px 14px rgba(0, 93, 172, 0.35);
+  transform: translateY(-1px);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: scale(0.96);
+  box-shadow: none;
 }
 
 .submit-button:disabled {
   background-color: var(--color-border-strong);
   cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

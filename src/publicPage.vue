@@ -1,5 +1,10 @@
 <template>
   <div class="public-page">
+    <div class="bg-blob bg-blob-1" aria-hidden="true" />
+    <div class="bg-blob bg-blob-2" aria-hidden="true" />
+    <div class="bg-blob bg-blob-3" aria-hidden="true" />
+    <div class="bg-blob bg-blob-4" aria-hidden="true" />
+
     <AppHeader />
 
     <main class="main-content">
@@ -55,7 +60,7 @@
             />
           </div>
 
-          <div class="field">
+          <div class="field" :class="{ 'field-elevated': showSuggestions }">
             <label class="field-label" for="nama">Pilih nama</label>
             <div ref="autocompleteRef" class="autocomplete">
               <input
@@ -297,15 +302,81 @@ async function handleSubmit() {
 
 <style scoped>
 .public-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background:
-    radial-gradient(50% 50% at 68% 68%, rgba(212, 227, 255, 1) 0%, rgba(212, 227, 255, 0) 50%),
-    radial-gradient(50% 50% at 32% 68%, rgba(152, 240, 255, 1) 0%, rgba(152, 240, 255, 0) 50%),
-    radial-gradient(50% 50% at 32% 32%, rgba(212, 227, 255, 1) 0%, rgba(212, 227, 255, 0) 50%),
-    radial-gradient(50% 50% at 68% 32%, rgba(92, 233, 254, 1) 0%, rgba(92, 233, 254, 0) 50%),
-    var(--color-bg);
+  background-color: var(--color-bg);
+}
+
+.bg-blob {
+  position: absolute;
+  z-index: -1;
+  width: 46vw;
+  height: 46vw;
+  max-width: 560px;
+  max-height: 560px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.6;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.bg-blob-1 {
+  top: -12%;
+  left: -10%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-1 20s ease-in-out infinite;
+}
+
+.bg-blob-2 {
+  top: 50%;
+  left: -14%;
+  background: rgba(152, 240, 255, 1);
+  animation: blob-float-2 24s ease-in-out infinite;
+}
+
+.bg-blob-3 {
+  top: -14%;
+  right: -10%;
+  background: rgba(92, 233, 254, 1);
+  animation: blob-float-3 22s ease-in-out infinite;
+}
+
+.bg-blob-4 {
+  bottom: -16%;
+  right: -8%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-4 26s ease-in-out infinite;
+}
+
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, 4vh) scale(1.12); }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4vw, -6vh) scale(1.08); }
+}
+
+@keyframes blob-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5vw, 5vh) scale(1.1); }
+}
+
+@keyframes blob-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, -4vh) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob {
+    animation: none;
+  }
 }
 
 .main-content {
@@ -329,6 +400,65 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: card-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 93, 172, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-heading,
+.form .field {
+  animation: field-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.card-heading {
+  animation-delay: 0.06s;
+}
+
+.form .field:nth-of-type(1) { animation-delay: 0.13s; }
+.form .field:nth-of-type(2) { animation-delay: 0.19s; }
+.form .field:nth-of-type(3) { animation-delay: 0.25s; }
+.form .field:nth-of-type(4) { animation-delay: 0.31s; }
+
+.submit-button {
+  animation: field-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.37s;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes field-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card-heading,
+  .form .field,
+  .submit-button {
+    animation: none !important;
+  }
+
+  .card:hover {
+    transform: none;
+  }
 }
 
 .decorative-blur-blob {
@@ -374,6 +504,11 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.field-elevated {
+  position: relative;
+  z-index: 30;
 }
 
 .field-label {
@@ -428,6 +563,11 @@ async function handleSubmit() {
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.suggestion-item:active {
+  transform: scale(0.97);
 }
 
 .suggestion-item:hover {
@@ -533,11 +673,15 @@ async function handleSubmit() {
   background-color: var(--color-surface);
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
 .dropzone:hover {
   border-color: var(--color-primary-light);
+}
+
+.dropzone:active {
+  transform: scale(0.985);
 }
 
 .dropzone-active {
@@ -603,15 +747,18 @@ async function handleSubmit() {
   letter-spacing: 0.14px;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.05s ease;
+  transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .submit-button:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
+  box-shadow: 0 4px 14px rgba(0, 93, 172, 0.35);
+  transform: translateY(-1px);
 }
 
 .submit-button:active:not(:disabled) {
-  transform: scale(0.99);
+  transform: scale(0.97);
+  box-shadow: var(--shadow-sm);
 }
 
 .submit-button:disabled {

@@ -29,7 +29,7 @@
                   class="type-dot"
                   :class="employee.jenisPegawai === 'Organik' ? 'type-organik' : 'type-non-organik'"
                 />
-                {{ employee.jenisPegawai }}
+                {{ jenisPegawaiLabel(employee.jenisPegawai) }}
               </span>
             </td>
           </tr>
@@ -74,7 +74,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { useSurveyStore } from "../stores/surveyStore";
+import { jenisPegawaiLabel, useSurveyStore } from "../stores/surveyStore";
 
 const props = defineProps({
   employees: {

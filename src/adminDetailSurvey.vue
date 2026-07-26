@@ -97,7 +97,7 @@
                       class="type-dot"
                       :class="employee.jenisPegawai === 'Organik' ? 'type-organik' : 'type-non-organik'"
                     />
-                    {{ employee.jenisPegawai }}
+                    {{ jenisPegawaiLabel(employee.jenisPegawai) }}
                   </span>
                 </td>
                 <td>
@@ -157,7 +157,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { useSurveyStore } from "./stores/surveyStore";
+import { jenisPegawaiLabel, useSurveyStore } from "./stores/surveyStore";
 
 const store = useSurveyStore();
 

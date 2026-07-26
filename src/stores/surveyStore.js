@@ -1,6 +1,13 @@
 import { defineStore } from "pinia";
 import { BUKTI_BUCKET, supabase } from "../lib/supabaseClient";
 
+// Display-only relabeling: "Non-Organik" pegawai are shown as "TAD" in the
+// UI, but the underlying data/enum value stays "Non-Organik" everywhere
+// (db column, comparisons, stored submissions) to avoid a schema migration.
+export function jenisPegawaiLabel(jenisPegawai) {
+  return jenisPegawai === "Non-Organik" ? "TAD" : jenisPegawai;
+}
+
 // ── Row <-> app-shape mappers (DB columns are snake_case, the app/components
 // use the camelCase field names that were already in place before this
 // Supabase migration, so component templates don't need to change) ────────
@@ -125,11 +132,14 @@ export const useSurveyStore = defineStore("survey", {
     unreadNotificationCount: (state) => state.notifications.filter((n) => !n.read).length,
 
     participationGroupedBy(state) {
-      return (getKey, submissionsList, allKeys) => {
+      return (getKey, submissionsList, allKeys, maxPengisian = 1) => {
         const list = submissionsList ?? state.submissions;
         const totalOrganik = state.workforceTotals.Organik;
         const totalNonOrganik = state.workforceTotals["Non-Organik"];
         const totalPegawai = totalOrganik + totalNonOrganik;
+        const targetOrganik = totalOrganik * maxPengisian;
+        const targetNonOrganik = totalNonOrganik * maxPengisian;
+        const targetTotal = targetOrganik + targetNonOrganik;
 
         const grouped = new Map();
         if (allKeys) {
@@ -147,22 +157,28 @@ export const useSurveyStore = defineStore("survey", {
           else bucket.nonOrganik++;
         }
 
-        return Array.from(grouped.entries()).map(([key, { organik, nonOrganik }]) => ({
-          key,
-          pegawaiOrganik: totalOrganik,
-          pegawaiNonOrganik: totalNonOrganik,
-          pegawaiTotal: totalPegawai,
-          pengisianOrganik: organik,
-          pengisianNonOrganik: nonOrganik,
-          pengisianTotal: organik + nonOrganik,
-          persenOrganik: totalOrganik > 0 ? Math.round((organik / totalOrganik) * 1000) / 10 : 0,
-          persenNonOrganik:
-            totalNonOrganik > 0 ? Math.round((nonOrganik / totalNonOrganik) * 1000) / 10 : 0,
-          persenTotal:
-            totalPegawai > 0
-              ? Math.round(((organik + nonOrganik) / totalPegawai) * 1000) / 10
-              : 0,
-        }));
+        return Array.from(grouped.entries()).map(([key, { organik, nonOrganik }]) => {
+          const pengisianTotal = organik + nonOrganik;
+          return {
+            key,
+            pegawaiOrganik: totalOrganik,
+            pegawaiNonOrganik: totalNonOrganik,
+            pegawaiTotal: totalPegawai,
+            targetOrganik,
+            targetNonOrganik,
+            targetTotal,
+            pengisianOrganik: organik,
+            pengisianNonOrganik: nonOrganik,
+            pengisianTotal,
+            gapOrganik: targetOrganik - organik,
+            gapNonOrganik: targetNonOrganik - nonOrganik,
+            gapTotal: targetTotal - pengisianTotal,
+            persenOrganik: targetOrganik > 0 ? Math.round((organik / targetOrganik) * 1000) / 10 : 0,
+            persenNonOrganik:
+              targetNonOrganik > 0 ? Math.round((nonOrganik / targetNonOrganik) * 1000) / 10 : 0,
+            persenTotal: targetTotal > 0 ? Math.round((pengisianTotal / targetTotal) * 1000) / 10 : 0,
+          };
+        });
       };
     },
   },

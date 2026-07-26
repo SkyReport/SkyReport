@@ -4,26 +4,30 @@
 
     <main class="main-content">
       <div class="card">
-        <div class="icon-badge">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M20 6L9 17l-5-5"
-              stroke="#005dac"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+        <div class="icon-badge-wrap">
+          <span class="icon-ring" />
+          <div class="icon-badge">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+              <path
+                class="check-path"
+                d="M20 6L9 17l-5-5"
+                stroke="#005dac"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
         </div>
 
-        <div class="card-heading">
+        <div class="card-heading anim-in anim-delay-1">
           <h1 class="card-title">Berhasil Mengunggah Bukti</h1>
           <p class="card-subtitle">
             Terima kasih, bukti survei Anda telah berhasil disimpan dalam sistem.
           </p>
         </div>
 
-        <div v-if="submission" class="summary">
+        <div v-if="submission" class="summary anim-in anim-delay-2">
           <div class="summary-row">
             <span class="summary-label">Survey</span>
             <span class="summary-value">{{ surveyName }}</span>
@@ -38,7 +42,7 @@
           </div>
         </div>
 
-        <RouterLink to="/" class="button">Kembali</RouterLink>
+        <RouterLink to="/" class="button anim-in anim-delay-3">Kembali</RouterLink>
       </div>
     </main>
   </div>
@@ -91,9 +95,29 @@ const surveyName = computed(() =>
   flex-direction: column;
   align-items: center;
   gap: 24px;
+  animation: card-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.icon-badge-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent-cyan-strong);
+  opacity: 0.6;
+  animation: ring-ping 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
 .icon-badge {
+  position: relative;
   width: 64px;
   height: 64px;
   border-radius: var(--radius-full);
@@ -101,6 +125,90 @@ const surveyName = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+}
+
+.check-path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: draw-check 0.35s ease-out 0.35s forwards;
+}
+
+@keyframes card-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ring-ping {
+  from {
+    opacity: 0.5;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.anim-in {
+  opacity: 0;
+  animation: field-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-delay-1 {
+  animation-delay: 0.5s;
+}
+
+.anim-delay-2 {
+  animation-delay: 0.58s;
+}
+
+.anim-delay-3 {
+  animation-delay: 0.66s;
+}
+
+@keyframes field-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .icon-ring,
+  .icon-badge,
+  .check-path,
+  .anim-in {
+    animation: none !important;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
 }
 
 .card-heading {

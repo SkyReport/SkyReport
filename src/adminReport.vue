@@ -8,6 +8,13 @@
           kepuasan di seluruh departemen InJourney Airports.
         </p>
       </div>
+      <button type="button" class="btn-export" @click="exportToPdf">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+          <path d="M10 3v9m0 0 3.5-3.5M10 12l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M4 14v2a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 16 16v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+        Export ke PDF
+      </button>
     </div>
 
     <div class="report-main">
@@ -16,7 +23,7 @@
             <div>
               <h2 class="card-title">Rekapitulasi Partisipasi per Tanggal</h2>
               <p class="card-subtitle">
-                Ringkasan agregat pengisian survei pegawai organik dan non-organik.
+                Ringkasan agregat pengisian survei pegawai Organik dan TAD.
               </p>
             </div>
             <div class="card-header-actions">
@@ -44,20 +51,24 @@
                 <tr class="group-row">
                   <th rowspan="2">No</th>
                   <th rowspan="2">Tanggal</th>
-                  <th colspan="3">Jumlah Pegawai</th>
-                  <th colspan="3">Pengisian Survey</th>
-                  <th colspan="3">Persentase</th>
+                  <th colspan="4">Pegawai Organik</th>
+                  <th colspan="4">Pegawai TAD</th>
+                  <th colspan="5">Total</th>
                 </tr>
                 <tr class="sub-row">
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Persentase</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,42 +79,38 @@
                       <div class="cell-date">{{ formatDate(row.key) }}</div>
                     </td>
                     <td>{{ row.pegawaiOrganik }}</td>
-                    <td>{{ row.pegawaiNonOrganik }}</td>
-                    <td>{{ row.pegawaiTotal }}</td>
+                    <td>{{ row.targetOrganik }}</td>
                     <td class="cell-accent">{{ row.pengisianOrganik }}</td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ row.gapOrganik }}</span></td>
+                    <td>{{ row.pegawaiNonOrganik }}</td>
+                    <td>{{ row.targetNonOrganik }}</td>
                     <td class="cell-accent">{{ row.pengisianNonOrganik }}</td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ row.gapNonOrganik }}</span></td>
+                    <td>{{ row.pegawaiTotal }}</td>
+                    <td>{{ row.targetTotal }}</td>
                     <td class="cell-accent">{{ row.pengisianTotal }}</td>
-                    <td>
-                      <span class="percent-value" :class="percentValueClass(row.persenOrganik)">
-                        {{ row.persenOrganik }}%
-                      </span>
-                    </td>
-                    <td>
-                      <span class="percent-value" :class="percentValueClass(row.persenNonOrganik)">
-                        {{ row.persenNonOrganik }}%
-                      </span>
-                    </td>
-                    <td>
-                      <span class="percent-value" :class="percentValueClass(row.persenTotal)">
-                        {{ row.persenTotal }}%
-                      </span>
-                    </td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ row.gapTotal }}</span></td>
+                    <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
                   </tr>
                 </template>
                 <tr v-if="dateTable.rows.value.length === 0">
-                  <td colspan="11" class="empty-row">Belum ada data partisipasi survei.</td>
+                  <td colspan="15" class="empty-row">Belum ada data partisipasi survei.</td>
                 </tr>
                 <tr v-if="dateTable.rows.value.length > 0" class="total-row">
                   <td colspan="2">Total Akumulasi</td>
                   <td>{{ dateTable.totals.value.pegawaiOrganik }}</td>
-                  <td>{{ dateTable.totals.value.pegawaiNonOrganik }}</td>
-                  <td>{{ dateTable.totals.value.pegawaiTotal }}</td>
+                  <td>{{ dateTable.totals.value.targetOrganik }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapOrganik)">{{ dateTable.totals.value.gapOrganik }}</span></td>
+                  <td>{{ dateTable.totals.value.pegawaiNonOrganik }}</td>
+                  <td>{{ dateTable.totals.value.targetNonOrganik }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianNonOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapNonOrganik)">{{ dateTable.totals.value.gapNonOrganik }}</span></td>
+                  <td>{{ dateTable.totals.value.pegawaiTotal }}</td>
+                  <td>{{ dateTable.totals.value.targetTotal }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianTotal }}</td>
-                  <td class="cell-accent">{{ dateTable.totals.value.persenOrganik }}%</td>
-                  <td class="cell-accent">{{ dateTable.totals.value.persenNonOrganik }}%</td>
-                  <td class="cell-accent">{{ dateTable.totals.value.persenTotal }}%</td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapTotal)">{{ dateTable.totals.value.gapTotal }}</span></td>
+                  <td><span class="percent-bold">{{ dateTable.totals.value.persenTotal }}%</span></td>
                 </tr>
               </tbody>
             </table>
@@ -148,26 +155,47 @@
             </div>
           </div>
 
-          <div class="table-scroll">
-            <table class="report-table">
+          <div class="table-scroll table-scroll-x">
+            <table class="report-table dept-table">
+              <colgroup>
+                <col style="width: 32px" />
+                <col style="width: 220px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+                <col style="width: 75px" />
+              </colgroup>
               <thead>
                 <tr class="group-row">
                   <th rowspan="2">No</th>
                   <th rowspan="2">Departemen</th>
-                  <th colspan="3">Jumlah Pegawai</th>
-                  <th colspan="3">Pengisian Survey</th>
-                  <th colspan="3">Persentase</th>
+                  <th colspan="4">Pegawai Organik</th>
+                  <th colspan="4">Pegawai TAD</th>
+                  <th colspan="5">Total</th>
                 </tr>
                 <tr class="sub-row">
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
-                  <th>Organik</th>
-                  <th>Non Organik</th>
-                  <th>Total</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Jumlah</th>
+                  <th>Target</th>
+                  <th>Voting</th>
+                  <th>Gap</th>
+                  <th>Persentase</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,41 +203,37 @@
                   <td>{{ deptTable.pageStart.value + index + 1 }}</td>
                   <td>{{ row.key }}</td>
                   <td>{{ row.pegawaiOrganik }}</td>
-                  <td>{{ row.pegawaiNonOrganik }}</td>
-                  <td>{{ row.pegawaiTotal }}</td>
+                  <td>{{ row.targetOrganik }}</td>
                   <td class="cell-accent">{{ row.pengisianOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ row.gapOrganik }}</span></td>
+                  <td>{{ row.pegawaiNonOrganik }}</td>
+                  <td>{{ row.targetNonOrganik }}</td>
                   <td class="cell-accent">{{ row.pengisianNonOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ row.gapNonOrganik }}</span></td>
+                  <td>{{ row.pegawaiTotal }}</td>
+                  <td>{{ row.targetTotal }}</td>
                   <td class="cell-accent">{{ row.pengisianTotal }}</td>
-                  <td>
-                    <span class="percent-value" :class="percentValueClass(row.persenOrganik)">
-                      {{ row.persenOrganik }}%
-                    </span>
-                  </td>
-                  <td>
-                    <span class="percent-value" :class="percentValueClass(row.persenNonOrganik)">
-                      {{ row.persenNonOrganik }}%
-                    </span>
-                  </td>
-                  <td>
-                    <span class="percent-value" :class="percentValueClass(row.persenTotal)">
-                      {{ row.persenTotal }}%
-                    </span>
-                  </td>
+                  <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ row.gapTotal }}</span></td>
+                  <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
                 </tr>
                 <tr v-if="deptTable.rows.value.length === 0">
-                  <td colspan="11" class="empty-row">Belum ada data partisipasi survei.</td>
+                  <td colspan="15" class="empty-row">Belum ada data partisipasi survei.</td>
                 </tr>
                 <tr v-if="deptTable.rows.value.length > 0" class="total-row">
                   <td colspan="2">Total Akumulasi</td>
                   <td>{{ deptTable.totals.value.pegawaiOrganik }}</td>
-                  <td>{{ deptTable.totals.value.pegawaiNonOrganik }}</td>
-                  <td>{{ deptTable.totals.value.pegawaiTotal }}</td>
+                  <td>{{ deptTable.totals.value.targetOrganik }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapOrganik)">{{ deptTable.totals.value.gapOrganik }}</span></td>
+                  <td>{{ deptTable.totals.value.pegawaiNonOrganik }}</td>
+                  <td>{{ deptTable.totals.value.targetNonOrganik }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianNonOrganik }}</td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapNonOrganik)">{{ deptTable.totals.value.gapNonOrganik }}</span></td>
+                  <td>{{ deptTable.totals.value.pegawaiTotal }}</td>
+                  <td>{{ deptTable.totals.value.targetTotal }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianTotal }}</td>
-                  <td class="cell-accent">{{ deptTable.totals.value.persenOrganik }}%</td>
-                  <td class="cell-accent">{{ deptTable.totals.value.persenNonOrganik }}%</td>
-                  <td class="cell-accent">{{ deptTable.totals.value.persenTotal }}%</td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapTotal)">{{ deptTable.totals.value.gapTotal }}</span></td>
+                  <td><span class="percent-bold">{{ deptTable.totals.value.persenTotal }}%</span></td>
                 </tr>
               </tbody>
             </table>
@@ -248,6 +272,8 @@
 </template>
 
 <script setup>
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { computed, onMounted, ref, watch } from "vue";
 import { useSurveyStore } from "./stores/surveyStore";
 
@@ -277,10 +303,12 @@ function useParticipationTable(getKey, { pageSize = 3, sort, allKeys } = {}) {
   const page = ref(1);
 
   const rows = computed(() => {
+    const maxPengisian = selectedSurveyFilter.value?.maxPengisian ?? 1;
     const list = store.participationGroupedBy(
       getKey,
       filteredSubmissions.value,
-      allKeys?.value ?? allKeys
+      allKeys?.value ?? allKeys,
+      maxPengisian
     );
     return sort ? [...list].sort(sort) : list;
   });
@@ -304,18 +332,27 @@ function useParticipationTable(getKey, { pageSize = 3, sort, allKeys } = {}) {
     const pegawaiOrganik = first?.pegawaiOrganik ?? 0;
     const pegawaiNonOrganik = first?.pegawaiNonOrganik ?? 0;
     const pegawaiTotal = first?.pegawaiTotal ?? 0;
+    const targetOrganik = first?.targetOrganik ?? 0;
+    const targetNonOrganik = first?.targetNonOrganik ?? 0;
+    const targetTotal = first?.targetTotal ?? 0;
 
     return {
       pegawaiOrganik,
       pegawaiNonOrganik,
       pegawaiTotal,
+      targetOrganik,
+      targetNonOrganik,
+      targetTotal,
       pengisianOrganik,
       pengisianNonOrganik,
       pengisianTotal,
-      persenOrganik: pegawaiOrganik > 0 ? Math.round((pengisianOrganik / pegawaiOrganik) * 1000) / 10 : 0,
+      gapOrganik: targetOrganik - pengisianOrganik,
+      gapNonOrganik: targetNonOrganik - pengisianNonOrganik,
+      gapTotal: targetTotal - pengisianTotal,
+      persenOrganik: targetOrganik > 0 ? Math.round((pengisianOrganik / targetOrganik) * 1000) / 10 : 0,
       persenNonOrganik:
-        pegawaiNonOrganik > 0 ? Math.round((pengisianNonOrganik / pegawaiNonOrganik) * 1000) / 10 : 0,
-      persenTotal: pegawaiTotal > 0 ? Math.round((pengisianTotal / pegawaiTotal) * 1000) / 10 : 0,
+        targetNonOrganik > 0 ? Math.round((pengisianNonOrganik / targetNonOrganik) * 1000) / 10 : 0,
+      persenTotal: targetTotal > 0 ? Math.round((pengisianTotal / targetTotal) * 1000) / 10 : 0,
     };
   });
 
@@ -332,13 +369,144 @@ const deptTable = useParticipationTable((s) => s.departemen, {
   allKeys: computed(() => store.departments),
 });
 
-function percentValueClass(value) {
-  return value >= 10 ? "value-positive" : "value-neutral";
+function gapValueClass(value) {
+  if (value <= 0) return "gap-done";
+  return "gap-pending";
 }
 
 function formatDate(isoDate) {
   const date = new Date(isoDate);
   return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+const reportGroupHead = [
+  [
+    { content: "No", rowSpan: 2 },
+    { content: "", rowSpan: 2 },
+    { content: "Pegawai Organik", colSpan: 4, styles: { halign: "center" } },
+    { content: "Pegawai TAD", colSpan: 4, styles: { halign: "center" } },
+    { content: "Total", colSpan: 5, styles: { halign: "center" } },
+  ],
+  [
+    "Jumlah", "Target", "Voting", "Gap",
+    "Jumlah", "Target", "Voting", "Gap",
+    "Jumlah", "Target", "Voting", "Gap", "Persentase",
+  ],
+];
+
+function buildReportBody(rows, totals, keyFormatter) {
+  const body = rows.map((row, index) => [
+    index + 1,
+    keyFormatter(row.key),
+    row.pegawaiOrganik,
+    row.targetOrganik,
+    row.pengisianOrganik,
+    row.gapOrganik,
+    row.pegawaiNonOrganik,
+    row.targetNonOrganik,
+    row.pengisianNonOrganik,
+    row.gapNonOrganik,
+    row.pegawaiTotal,
+    row.targetTotal,
+    row.pengisianTotal,
+    row.gapTotal,
+    { content: `${row.persenTotal}%`, styles: { fontStyle: "bold" } },
+  ]);
+
+  body.push([
+    { content: "Total Akumulasi", colSpan: 2, styles: { fontStyle: "bold" } },
+    totals.pegawaiOrganik,
+    totals.targetOrganik,
+    totals.pengisianOrganik,
+    totals.gapOrganik,
+    totals.pegawaiNonOrganik,
+    totals.targetNonOrganik,
+    totals.pengisianNonOrganik,
+    totals.gapNonOrganik,
+    totals.pegawaiTotal,
+    totals.targetTotal,
+    totals.pengisianTotal,
+    totals.gapTotal,
+    { content: `${totals.persenTotal}%`, styles: { fontStyle: "bold" } },
+  ]);
+
+  return body;
+}
+
+const SECTION_BOUNDARY_COLUMNS = [1, 5, 9];
+
+function drawSectionDividers(data) {
+  if (!SECTION_BOUNDARY_COLUMNS.includes(data.column.index)) return;
+  const x = data.cell.x + data.cell.width;
+  if (data.section === "head") {
+    data.doc.setDrawColor(255, 255, 255);
+  } else {
+    data.doc.setDrawColor(100, 116, 139);
+  }
+  data.doc.setLineWidth(0.3);
+  data.doc.line(x, data.cell.y, x, data.cell.y + data.cell.height);
+}
+
+function exportToPdf() {
+  const doc = new jsPDF({ orientation: "landscape" });
+  const surveyLabel = selectedSurveyFilter.value ? selectedSurveyFilter.value.nama : "Semua Survey";
+
+  doc.setFontSize(14);
+  doc.text("Laporan Hasil Survei - Survey Central", 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Survey: ${surveyLabel}`, 14, 21);
+  doc.text(`Diekspor pada: ${new Date().toLocaleString("id-ID")}`, 14, 26);
+
+  const dateHead = JSON.parse(JSON.stringify(reportGroupHead));
+  dateHead[0][1].content = "Tanggal";
+
+  doc.setFontSize(12);
+  doc.text("Rekapitulasi Partisipasi per Tanggal", 14, 34);
+  autoTable(doc, {
+    head: dateHead,
+    body: buildReportBody(dateTable.rows.value, dateTable.totals.value, formatDate),
+    startY: 37,
+    theme: "grid",
+    tableLineColor: [15, 23, 42],
+    tableLineWidth: 0.3,
+    styles: { fontSize: 8, halign: "center", lineColor: [180, 190, 205], lineWidth: 0.15 },
+    headStyles: {
+      fillColor: [0, 93, 172],
+      halign: "center",
+      lineColor: [255, 255, 255],
+      lineWidth: 0.15,
+    },
+    columnStyles: { 1: { halign: "left" } },
+    didDrawCell: drawSectionDividers,
+  });
+
+  const deptHead = JSON.parse(JSON.stringify(reportGroupHead));
+  deptHead[0][1].content = "Departemen";
+
+  doc.addPage();
+  doc.setFontSize(12);
+  doc.text("Rekapitulasi Partisipasi per Departemen", 14, 15);
+  autoTable(doc, {
+    head: deptHead,
+    body: buildReportBody(deptTable.rows.value, deptTable.totals.value, (key) => key),
+    startY: 18,
+    theme: "grid",
+    tableLineColor: [15, 23, 42],
+    tableLineWidth: 0.3,
+    styles: { fontSize: 8, halign: "center", lineColor: [180, 190, 205], lineWidth: 0.15 },
+    headStyles: {
+      fillColor: [0, 93, 172],
+      halign: "center",
+      lineColor: [255, 255, 255],
+      lineWidth: 0.15,
+    },
+    columnStyles: { 1: { halign: "left" } },
+    didDrawCell: drawSectionDividers,
+  });
+
+  const slug = surveyLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  doc.save(`laporan-survey-${slug}-${dateStamp}.pdf`);
 }
 </script>
 
@@ -355,6 +523,29 @@ function formatDate(isoDate) {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 93, 172, 0.3);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-export:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: 0 3px 10px rgba(0, 93, 172, 0.4);
 }
 
 .page-title {
@@ -463,30 +654,50 @@ function formatDate(isoDate) {
 }
 
 .table-scroll {
-  overflow-x: auto;
+  overflow-x: visible;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
+.table-scroll-x {
+  overflow-x: auto;
+}
+
 .report-table {
   width: 100%;
-  min-width: 900px;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
+}
+
+.dept-table {
+  width: auto;
+  min-width: 1227px;
+  table-layout: fixed;
+}
+
+.report-table.dept-table tbody td:nth-child(2) {
+  white-space: normal;
+}
+
+.report-table.dept-table tr.group-row th {
+  white-space: normal;
 }
 
 .report-table thead th {
   text-align: center;
-  padding: 10px 14px;
-  font-size: 11px;
+  padding: 12px 6px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--color-text-muted);
   background-color: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .report-table thead .group-row th:first-child,
@@ -496,15 +707,32 @@ function formatDate(isoDate) {
 
 .report-table tbody td {
   text-align: center;
-  padding: 12px 14px;
+  padding: 12px 5px;
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
   color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.report-table tbody td:first-child,
-.report-table tbody td:nth-child(2) {
+.report-table tbody tr:not(.total-row) td:first-child,
+.report-table tbody tr:not(.total-row) td:nth-child(2) {
   text-align: left;
+}
+
+.report-table tbody tr.total-row td:first-child {
+  text-align: left;
+}
+
+.report-table tr:not(.sub-row) th:first-child,
+.report-table td:first-child {
+  width: 32px;
+}
+
+.report-table tr:not(.sub-row) th:nth-child(2),
+.report-table td:nth-child(2) {
+  width: 100px;
 }
 
 .report-table tbody tr:last-child td {
@@ -539,16 +767,21 @@ function formatDate(isoDate) {
   background-color: #eff6ff;
 }
 
-.percent-value {
-  font-weight: 600;
+.gap-value {
+  font-weight: 700;
 }
 
-.value-positive {
+.gap-done {
   color: var(--color-success);
 }
 
-.value-neutral {
-  color: var(--color-text-secondary);
+.gap-pending {
+  color: var(--color-danger);
+}
+
+.percent-bold {
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
 .empty-row {
