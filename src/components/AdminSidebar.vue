@@ -19,6 +19,17 @@
     </div>
 
     <nav class="sidebar-nav">
+      <RouterLink to="/admin/dashboard" class="nav-item" active-class="active">
+        <span class="nav-icon-box">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <rect x="2.5" y="10.5" width="3.5" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+            <rect x="8.25" y="6" width="3.5" height="11.5" rx="1" stroke="currentColor" stroke-width="1.6" />
+            <rect x="14" y="2.5" width="3.5" height="15" rx="1" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        </span>
+        Dashboard Admin
+      </RouterLink>
+
       <RouterLink to="/admin/management" class="nav-item" active-class="active">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">

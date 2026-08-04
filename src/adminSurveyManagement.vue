@@ -2,7 +2,7 @@
   <div class="dashboard-page">
     <div class="page-heading">
       <div>
-        <h1 class="page-title">Dashboard Kelola Survei</h1>
+        <h1 class="page-title">Kelola Survei</h1>
         <p class="page-subtitle">Create and manage internal employee surveys efficiently.</p>
       </div>
       <RouterLink to="/admin/buat-survey" class="btn-add">

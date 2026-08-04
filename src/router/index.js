@@ -28,6 +28,12 @@ const routes = [
         redirect: { name: "admin-survey-management" },
       },
       {
+        path: "dashboard",
+        name: "admin-dashboard",
+        component: () => import("../adminDashboard.vue"),
+        meta: { title: "Dashboard Admin" },
+      },
+      {
         path: "management",
         name: "admin-survey-management",
         component: () => import("../adminSurveyManagement.vue"),

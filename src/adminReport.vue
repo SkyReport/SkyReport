@@ -581,7 +581,7 @@ const deptRows = computed(() =>
 const deptTable = useRowsTable(deptRows, { pageSize: 10 });
 
 function gapValueClass(value) {
-  if (value <= 0) return "gap-done";
+  if (value > 0) return "gap-done";
   return "gap-pending";
 }
 
