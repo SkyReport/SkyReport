@@ -81,15 +81,15 @@
                     <td>{{ row.pegawaiOrganik }}</td>
                     <td>{{ row.targetOrganik }}</td>
                     <td class="cell-accent">{{ row.pengisianOrganik }}</td>
-                    <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ row.gapOrganik }}</span></td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ formatGap(row.gapOrganik) }}</span></td>
                     <td>{{ row.pegawaiNonOrganik }}</td>
                     <td>{{ row.targetNonOrganik }}</td>
                     <td class="cell-accent">{{ row.pengisianNonOrganik }}</td>
-                    <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ row.gapNonOrganik }}</span></td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ formatGap(row.gapNonOrganik) }}</span></td>
                     <td>{{ row.pegawaiTotal }}</td>
                     <td>{{ row.targetTotal }}</td>
                     <td class="cell-accent">{{ row.pengisianTotal }}</td>
-                    <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ row.gapTotal }}</span></td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ formatGap(row.gapTotal) }}</span></td>
                     <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
                   </tr>
                 </template>
@@ -101,15 +101,15 @@
                   <td>{{ dateTable.totals.value.pegawaiOrganik }}</td>
                   <td>{{ dateTable.totals.value.targetOrganik }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapOrganik)">{{ dateTable.totals.value.gapOrganik }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapOrganik)">{{ formatGap(dateTable.totals.value.gapOrganik) }}</span></td>
                   <td>{{ dateTable.totals.value.pegawaiNonOrganik }}</td>
                   <td>{{ dateTable.totals.value.targetNonOrganik }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianNonOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapNonOrganik)">{{ dateTable.totals.value.gapNonOrganik }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapNonOrganik)">{{ formatGap(dateTable.totals.value.gapNonOrganik) }}</span></td>
                   <td>{{ dateTable.totals.value.pegawaiTotal }}</td>
                   <td>{{ dateTable.totals.value.targetTotal }}</td>
                   <td class="cell-accent">{{ dateTable.totals.value.pengisianTotal }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapTotal)">{{ dateTable.totals.value.gapTotal }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(dateTable.totals.value.gapTotal)">{{ formatGap(dateTable.totals.value.gapTotal) }}</span></td>
                   <td><span class="percent-bold">{{ dateTable.totals.value.persenTotal }}%</span></td>
                 </tr>
               </tbody>
@@ -199,23 +199,112 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, index) in deptTable.pagedRows.value" :key="row.key">
-                  <td>{{ deptTable.pageStart.value + index + 1 }}</td>
-                  <td>{{ row.key }}</td>
-                  <td>{{ row.pegawaiOrganik }}</td>
-                  <td>{{ row.targetOrganik }}</td>
-                  <td class="cell-accent">{{ row.pengisianOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ row.gapOrganik }}</span></td>
-                  <td>{{ row.pegawaiNonOrganik }}</td>
-                  <td>{{ row.targetNonOrganik }}</td>
-                  <td class="cell-accent">{{ row.pengisianNonOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ row.gapNonOrganik }}</span></td>
-                  <td>{{ row.pegawaiTotal }}</td>
-                  <td>{{ row.targetTotal }}</td>
-                  <td class="cell-accent">{{ row.pengisianTotal }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ row.gapTotal }}</span></td>
-                  <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
-                </tr>
+                <template v-for="(row, index) in deptTable.pagedRows.value" :key="row.key">
+                  <tr>
+                    <td>{{ deptTable.pageStart.value + index + 1 }}</td>
+                    <td>
+                      <button type="button" class="dept-name-toggle" @click="toggleDivisi(row.key)">
+                        <svg
+                          class="dept-chevron"
+                          :class="{ 'dept-chevron-open': expandedDept === row.key }"
+                          width="12"
+                          height="12"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                        >
+                          <path d="M6 4l8 6-8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        {{ row.key }}
+                      </button>
+                    </td>
+                    <td>{{ row.pegawaiOrganik }}</td>
+                    <td>{{ row.targetOrganik }}</td>
+                    <td class="cell-accent">{{ row.pengisianOrganik }}</td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapOrganik)">{{ formatGap(row.gapOrganik) }}</span></td>
+                    <td>{{ row.pegawaiNonOrganik }}</td>
+                    <td>{{ row.targetNonOrganik }}</td>
+                    <td class="cell-accent">{{ row.pengisianNonOrganik }}</td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapNonOrganik)">{{ formatGap(row.gapNonOrganik) }}</span></td>
+                    <td>{{ row.pegawaiTotal }}</td>
+                    <td>{{ row.targetTotal }}</td>
+                    <td class="cell-accent">{{ row.pengisianTotal }}</td>
+                    <td><span class="gap-value" :class="gapValueClass(row.gapTotal)">{{ formatGap(row.gapTotal) }}</span></td>
+                    <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
+                  </tr>
+                  <tr v-if="expandedDept === row.key" class="divisi-row">
+                    <td colspan="15">
+                      <div class="divisi-panel">
+                        <span class="divisi-panel-label">Department Head di bawah {{ row.key }}</span>
+                        <table class="divisi-table">
+                          <colgroup>
+                            <col style="width: 190px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 70px" />
+                            <col style="width: 85px" />
+                          </colgroup>
+                          <thead>
+                            <tr class="group-row">
+                              <th rowspan="2">Departemen</th>
+                              <th colspan="4">Pegawai Organik</th>
+                              <th colspan="4">Pegawai TAD</th>
+                              <th colspan="5">Total</th>
+                            </tr>
+                            <tr class="sub-row">
+                              <th>Jumlah</th>
+                              <th>Target</th>
+                              <th>Voting</th>
+                              <th>Gap</th>
+                              <th>Jumlah</th>
+                              <th>Target</th>
+                              <th>Voting</th>
+                              <th>Gap</th>
+                              <th>Jumlah</th>
+                              <th>Target</th>
+                              <th>Voting</th>
+                              <th>Gap</th>
+                              <th>Persentase</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="child in childrenBreakdown(row.key)" :key="child.key">
+                              <td class="divisi-cell-name">
+                                <RouterLink
+                                  class="dept-link"
+                                  :to="departmentDetailLink(child.key)"
+                                >
+                                  {{ shortDeptName(child.key) }}
+                                </RouterLink>
+                              </td>
+                              <td>{{ child.pegawaiOrganik }}</td>
+                              <td>{{ child.targetOrganik }}</td>
+                              <td class="cell-accent">{{ child.pengisianOrganik }}</td>
+                              <td><span class="gap-value" :class="gapValueClass(child.gapOrganik)">{{ formatGap(child.gapOrganik) }}</span></td>
+                              <td>{{ child.pegawaiNonOrganik }}</td>
+                              <td>{{ child.targetNonOrganik }}</td>
+                              <td class="cell-accent">{{ child.pengisianNonOrganik }}</td>
+                              <td><span class="gap-value" :class="gapValueClass(child.gapNonOrganik)">{{ formatGap(child.gapNonOrganik) }}</span></td>
+                              <td>{{ child.pegawaiTotal }}</td>
+                              <td>{{ child.targetTotal }}</td>
+                              <td class="cell-accent">{{ child.pengisianTotal }}</td>
+                              <td><span class="gap-value" :class="gapValueClass(child.gapTotal)">{{ formatGap(child.gapTotal) }}</span></td>
+                              <td><span class="percent-bold">{{ child.persenTotal }}%</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
                 <tr v-if="deptTable.rows.value.length === 0">
                   <td colspan="15" class="empty-row">Belum ada data partisipasi survei.</td>
                 </tr>
@@ -224,15 +313,15 @@
                   <td>{{ deptTable.totals.value.pegawaiOrganik }}</td>
                   <td>{{ deptTable.totals.value.targetOrganik }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapOrganik)">{{ deptTable.totals.value.gapOrganik }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapOrganik)">{{ formatGap(deptTable.totals.value.gapOrganik) }}</span></td>
                   <td>{{ deptTable.totals.value.pegawaiNonOrganik }}</td>
                   <td>{{ deptTable.totals.value.targetNonOrganik }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianNonOrganik }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapNonOrganik)">{{ deptTable.totals.value.gapNonOrganik }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapNonOrganik)">{{ formatGap(deptTable.totals.value.gapNonOrganik) }}</span></td>
                   <td>{{ deptTable.totals.value.pegawaiTotal }}</td>
                   <td>{{ deptTable.totals.value.targetTotal }}</td>
                   <td class="cell-accent">{{ deptTable.totals.value.pengisianTotal }}</td>
-                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapTotal)">{{ deptTable.totals.value.gapTotal }}</span></td>
+                  <td><span class="gap-value" :class="gapValueClass(deptTable.totals.value.gapTotal)">{{ formatGap(deptTable.totals.value.gapTotal) }}</span></td>
                   <td><span class="percent-bold">{{ deptTable.totals.value.persenTotal }}%</span></td>
                 </tr>
               </tbody>
@@ -275,13 +364,136 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
 
 const store = useSurveyStore();
+const route = useRoute();
 
 onMounted(() => store.ensureBaseData());
 
-const selectedSurveyFilterId = ref(null);
+const expandedDept = ref(null);
+
+function toggleDivisi(deptKey) {
+  expandedDept.value = expandedDept.value === deptKey ? null : deptKey;
+}
+
+// Display-only: drop the redundant " Department Head" suffix in the expand
+// table. "Airport Operation Center Head" has no such suffix so it's left
+// untouched. The underlying department name (used for links/data lookups)
+// stays the full original string.
+function shortDeptName(name) {
+  return name.replace(" Department Head", "");
+}
+
+function departmentDetailLink(deptName) {
+  return {
+    name: "admin-department-detail",
+    params: { department: deptName },
+    query: selectedSurveyFilterId.value ? { survey: selectedSurveyFilterId.value } : {},
+  };
+}
+
+// Jumlah/Target/Gap per departemen dihitung dari data pegawai ASLI
+// (store.employees, hasil migrasi 005) — bukan dari konstanta
+// workforceTotals (150/50) yang cuma representasi total perusahaan
+// secara keseluruhan dan tidak selalu match dengan jumlah pegawai
+// yang benar-benar terdaftar per departemen.
+function buildDeptRow(key, deptNames) {
+  const maxPengisian = selectedSurveyFilter.value?.maxPengisian ?? 1;
+  const deptSet = new Set(deptNames);
+
+  const employeesHere = store.employees.filter((e) => deptSet.has(e.unitKerja));
+  const pegawaiOrganik = employeesHere.filter((e) => e.jenisPegawai === "Organik").length;
+  const pegawaiNonOrganik = employeesHere.length - pegawaiOrganik;
+  const pegawaiTotal = employeesHere.length;
+
+  const targetOrganik = pegawaiOrganik * maxPengisian;
+  const targetNonOrganik = pegawaiNonOrganik * maxPengisian;
+  const targetTotal = targetOrganik + targetNonOrganik;
+
+  const scoped = filteredSubmissions.value.filter((s) => deptSet.has(s.departemen));
+  const pengisianOrganik = scoped.filter((s) => s.jenisPegawai === "Organik").length;
+  const pengisianNonOrganik = scoped.length - pengisianOrganik;
+  const pengisianTotal = scoped.length;
+
+  return {
+    key,
+    pegawaiOrganik,
+    pegawaiNonOrganik,
+    pegawaiTotal,
+    targetOrganik,
+    targetNonOrganik,
+    targetTotal,
+    pengisianOrganik,
+    pengisianNonOrganik,
+    pengisianTotal,
+    gapOrganik: targetOrganik - pengisianOrganik,
+    gapNonOrganik: targetNonOrganik - pengisianNonOrganik,
+    gapTotal: targetTotal - pengisianTotal,
+    persenOrganik: targetOrganik > 0 ? Math.round((pengisianOrganik / targetOrganik) * 1000) / 10 : 0,
+    persenNonOrganik:
+      targetNonOrganik > 0 ? Math.round((pengisianNonOrganik / targetNonOrganik) * 1000) / 10 : 0,
+    persenTotal: targetTotal > 0 ? Math.round((pengisianTotal / targetTotal) * 1000) / 10 : 0,
+  };
+}
+
+function childrenBreakdown(parentKey) {
+  const children = ORG_CHILDREN_BY_PARENT.get(parentKey) ?? [];
+  return children.map((leaf) => buildDeptRow(leaf, [leaf]));
+}
+
+function useRowsTable(rowsRef, { pageSize = 10 } = {}) {
+  const page = ref(1);
+  const rows = computed(() => rowsRef.value);
+  const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / pageSize)));
+
+  watch(rows, () => {
+    if (page.value > totalPages.value) page.value = totalPages.value;
+  });
+
+  const pageStart = computed(() => (page.value - 1) * pageSize);
+  const pageEnd = computed(() => Math.min(pageStart.value + pageSize, rows.value.length));
+  const pagedRows = computed(() => rows.value.slice(pageStart.value, pageEnd.value));
+
+  const totals = computed(() => {
+    const list = rows.value;
+    const sum = (field) => list.reduce((acc, r) => acc + r[field], 0);
+    const pegawaiOrganik = sum("pegawaiOrganik");
+    const pegawaiNonOrganik = sum("pegawaiNonOrganik");
+    const pegawaiTotal = pegawaiOrganik + pegawaiNonOrganik;
+    const targetOrganik = sum("targetOrganik");
+    const targetNonOrganik = sum("targetNonOrganik");
+    const targetTotal = targetOrganik + targetNonOrganik;
+    const pengisianOrganik = sum("pengisianOrganik");
+    const pengisianNonOrganik = sum("pengisianNonOrganik");
+    const pengisianTotal = pengisianOrganik + pengisianNonOrganik;
+
+    return {
+      pegawaiOrganik,
+      pegawaiNonOrganik,
+      pegawaiTotal,
+      targetOrganik,
+      targetNonOrganik,
+      targetTotal,
+      pengisianOrganik,
+      pengisianNonOrganik,
+      pengisianTotal,
+      gapOrganik: targetOrganik - pengisianOrganik,
+      gapNonOrganik: targetNonOrganik - pengisianNonOrganik,
+      gapTotal: targetTotal - pengisianTotal,
+      persenOrganik: targetOrganik > 0 ? Math.round((pengisianOrganik / targetOrganik) * 1000) / 10 : 0,
+      persenNonOrganik:
+        targetNonOrganik > 0 ? Math.round((pengisianNonOrganik / targetNonOrganik) * 1000) / 10 : 0,
+      persenTotal: targetTotal > 0 ? Math.round((pengisianTotal / targetTotal) * 1000) / 10 : 0,
+    };
+  });
+
+  return { page, rows, totalPages, pageStart, pageEnd, pagedRows, totals };
+}
+
+const selectedSurveyFilterId = ref(route.query.survey ? Number(route.query.survey) : null);
 
 const selectedSurveyFilter = computed(() =>
   selectedSurveyFilterId.value ? store.findSurvey(selectedSurveyFilterId.value) : null
@@ -363,15 +575,18 @@ const dateTable = useParticipationTable((s) => s.tanggal, {
   pageSize: 6,
   sort: (a, b) => (a.key < b.key ? 1 : -1),
 });
-const deptTable = useParticipationTable((s) => s.departemen, {
-  pageSize: 10,
-  sort: (a, b) => (a.key < b.key ? -1 : 1),
-  allKeys: computed(() => store.departments),
-});
+const deptRows = computed(() =>
+  ORG_PARENT_KEYS.map((key) => buildDeptRow(key, ORG_CHILDREN_BY_PARENT.get(key) ?? []))
+);
+const deptTable = useRowsTable(deptRows, { pageSize: 10 });
 
 function gapValueClass(value) {
   if (value <= 0) return "gap-done";
   return "gap-pending";
+}
+
+function formatGap(value) {
+  return value > 0 ? `+${value}` : `${value}`;
 }
 
 function formatDate(isoDate) {
@@ -401,15 +616,15 @@ function buildReportBody(rows, totals, keyFormatter) {
     row.pegawaiOrganik,
     row.targetOrganik,
     row.pengisianOrganik,
-    row.gapOrganik,
+    formatGap(row.gapOrganik),
     row.pegawaiNonOrganik,
     row.targetNonOrganik,
     row.pengisianNonOrganik,
-    row.gapNonOrganik,
+    formatGap(row.gapNonOrganik),
     row.pegawaiTotal,
     row.targetTotal,
     row.pengisianTotal,
-    row.gapTotal,
+    formatGap(row.gapTotal),
     { content: `${row.persenTotal}%`, styles: { fontStyle: "bold" } },
   ]);
 
@@ -418,15 +633,15 @@ function buildReportBody(rows, totals, keyFormatter) {
     totals.pegawaiOrganik,
     totals.targetOrganik,
     totals.pengisianOrganik,
-    totals.gapOrganik,
+    formatGap(totals.gapOrganik),
     totals.pegawaiNonOrganik,
     totals.targetNonOrganik,
     totals.pengisianNonOrganik,
-    totals.gapNonOrganik,
+    formatGap(totals.gapNonOrganik),
     totals.pegawaiTotal,
     totals.targetTotal,
     totals.pengisianTotal,
-    totals.gapTotal,
+    formatGap(totals.gapTotal),
     { content: `${totals.persenTotal}%`, styles: { fontStyle: "bold" } },
   ]);
 
@@ -739,9 +954,9 @@ function exportToPdf() {
   border-bottom: none;
 }
 
-.report-table th:last-child,
-.report-table td:last-child {
-  border-right: none;
+.report-table th:first-child,
+.report-table td:first-child {
+  border-left: 1px solid var(--color-border);
 }
 
 .report-table tbody tr:not(.total-row):not(.expand-row):hover td {
@@ -765,6 +980,131 @@ function exportToPdf() {
   font-weight: 700;
   color: var(--color-primary);
   background-color: #eff6ff;
+}
+
+.dept-name-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dept-name-toggle:hover {
+  color: var(--color-primary);
+}
+
+.dept-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform 0.15s ease;
+}
+
+.dept-chevron-open {
+  transform: rotate(90deg);
+  color: var(--color-primary);
+}
+
+.divisi-row td {
+  background-color: var(--color-bg);
+  padding: 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+}
+
+.divisi-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  text-align: left;
+  white-space: normal;
+}
+
+.divisi-panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.divisi-table {
+  width: auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 12px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.divisi-table thead tr:first-child th {
+  border-top: 2px solid var(--color-border-strong);
+}
+
+.divisi-table tbody tr:last-child td {
+  border-bottom: 2px solid var(--color-border-strong);
+}
+
+.divisi-table thead th {
+  text-align: center !important;
+  padding: 7px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: initial !important;
+  line-height: 1.3;
+}
+
+.divisi-table tbody td {
+  text-align: center !important;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text);
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: initial !important;
+  line-height: 1.3;
+}
+
+.divisi-table th:first-child,
+.divisi-table td:first-child {
+  border-left: 1px solid var(--color-border);
+}
+
+.divisi-cell-name {
+  text-align: center !important;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.dept-link {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dept-link:hover {
+  text-decoration: underline;
 }
 
 .gap-value {

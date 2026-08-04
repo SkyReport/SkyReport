@@ -105,25 +105,6 @@ export const useSurveyStore = defineStore("survey", {
       return this.surveys.filter((s) => s.status === "Aktif");
     },
 
-    employeesBelumSurvey(state) {
-      const submittedNames = new Set(state.submissions.map((s) => s.nama));
-      return state.employees.filter((e) => !submittedNames.has(e.nama));
-    },
-
-    employeesBelumSurveyOnDate: (state) => (tanggal) => {
-      const submittedNames = new Set(
-        state.submissions.filter((s) => s.tanggal === tanggal).map((s) => s.nama)
-      );
-      return state.employees.filter((e) => !submittedNames.has(e.nama));
-    },
-
-    employeesBelumSurveyForSurvey: (state) => (surveyId) => {
-      const submittedNames = new Set(
-        state.submissions.filter((s) => s.surveyId === surveyId).map((s) => s.nama)
-      );
-      return state.employees.filter((e) => !submittedNames.has(e.nama));
-    },
-
     submissionsBySurvey: (state) => (surveyId) =>
       state.submissions.filter((s) => s.surveyId === surveyId),
 

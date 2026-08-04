@@ -46,9 +46,9 @@ const routes = [
         meta: { title: "Laporan" },
       },
       {
-        path: "detail-survey",
-        name: "admin-detail-survey",
-        component: () => import("../adminDetailSurvey.vue"),
+        path: "detail-survey/:department",
+        name: "admin-department-detail",
+        component: () => import("../adminDepartmentDetail.vue"),
         meta: { title: "Detail Survey" },
       },
     ],
