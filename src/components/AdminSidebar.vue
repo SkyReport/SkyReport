@@ -13,7 +13,7 @@
         </svg>
       </div>
       <div class="brand-text">
-        <span class="brand-title">Survey Central</span>
+        <span class="brand-title">SkyVote</span>
         <span class="brand-subtitle">InJourney Management</span>
       </div>
     </div>
@@ -41,7 +41,7 @@
             />
           </svg>
         </span>
-        Survey Data
+        Manage Survey
       </RouterLink>
 
       <RouterLink to="/admin/report" class="nav-item" active-class="active">
@@ -52,6 +52,21 @@
           </svg>
         </span>
         Reports
+      </RouterLink>
+
+      <RouterLink to="/admin/hapus-gambar" class="nav-item" active-class="active">
+        <span class="nav-icon-box">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M3 5.5h14M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5 5.5l.7 10.2a1.5 1.5 0 0 0 1.5 1.4h5.6a1.5 1.5 0 0 0 1.5-1.4l.7-10.2"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        Delete Image
       </RouterLink>
     </nav>
 
@@ -94,7 +109,10 @@ async function handleLogout() {
   left: 0;
   bottom: 0;
   width: 256px;
-  background-color: var(--color-sidebar-bg);
+  background-color: var(--glass-sidebar-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   z-index: 20;

@@ -36,6 +36,10 @@
             <span class="summary-label">Tanggal</span>
             <span class="summary-value">{{ submission.tanggal }}</span>
           </div>
+          <div v-if="submissionTime" class="summary-row">
+            <span class="summary-label">Jam</span>
+            <span class="summary-value">{{ submissionTime }}</span>
+          </div>
           <div class="summary-row">
             <span class="summary-label">Nama</span>
             <span class="summary-value">{{ submission.nama }}</span>
@@ -58,6 +62,12 @@ const submission = computed(() => store.lastSubmission);
 const surveyName = computed(() =>
   submission.value ? store.findSurvey(submission.value.surveyId)?.nama ?? "-" : "-"
 );
+const submissionTime = computed(() => {
+  if (!submission.value?.createdAt) return "";
+  const date = new Date(submission.value.createdAt);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+});
 </script>
 
 <style scoped>
@@ -87,10 +97,11 @@ const surveyName = computed(() =>
   max-width: 480px;
   padding: 24px;
   border-radius: var(--radius-lg);
-  background-color: #ffffffd9;
-  backdrop-filter: blur(8px);
-  border: 1px solid #ffffff66;
-  box-shadow: 0 8px 32px rgba(0, 93, 172, 0.15);
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;

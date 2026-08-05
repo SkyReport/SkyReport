@@ -1,5 +1,10 @@
 <template>
   <div class="admin-layout">
+    <div class="bg-blob bg-blob-1" aria-hidden="true" />
+    <div class="bg-blob bg-blob-2" aria-hidden="true" />
+    <div class="bg-blob bg-blob-3" aria-hidden="true" />
+    <div class="bg-blob bg-blob-4" aria-hidden="true" />
+
     <AppHeader class="admin-header">
       <template #brand>
         <div class="page-context">
@@ -159,6 +164,9 @@ function formatNotifTime(isoString) {
 
 <style scoped>
 .admin-layout {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 100vh;
   background-color: var(--color-bg);
 }
@@ -169,6 +177,12 @@ function formatNotifTime(isoString) {
   left: 0;
   right: 0;
   z-index: 30;
+}
+
+.admin-header :deep(.app-header) {
+  background-color: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .admin-header::after {
@@ -275,10 +289,12 @@ function formatNotifTime(isoString) {
   max-height: 400px;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--glass-shadow);
   z-index: 50;
   overflow: hidden;
 }

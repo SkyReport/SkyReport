@@ -73,6 +73,51 @@
         </div>
       </div>
     </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h2 class="chart-title">Total Partisipasi per Departemen</h2>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item">
+          <span class="legend-swatch legend-swatch-target" />
+          Target
+        </span>
+        <span class="legend-item">
+          <span class="legend-swatch legend-swatch-voting" />
+          Voting
+        </span>
+      </div>
+
+      <div class="dept-list">
+        <div v-for="row in departmentRows" :key="row.key" class="dept-row">
+          <span class="dept-row-label" :title="row.shortLabel">{{ row.shortLabel }}</span>
+          <div class="dept-row-bars">
+            <div class="dept-bar-row">
+              <div class="dept-bar-track">
+                <div
+                  class="dept-bar dept-bar-target"
+                  :style="{ width: deptBarWidth(row.target) + '%' }"
+                  :title="`Target: ${row.target.toLocaleString('id-ID')}`"
+                />
+              </div>
+              <span class="dept-bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
+            </div>
+            <div class="dept-bar-row">
+              <div class="dept-bar-track">
+                <div
+                  class="dept-bar dept-bar-voting"
+                  :style="{ width: deptBarWidth(row.voting) + '%' }"
+                  :title="`Voting: ${row.voting.toLocaleString('id-ID')}`"
+                />
+              </div>
+              <span class="dept-bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -144,6 +189,28 @@ function barHeight(value) {
 }
 
 const gridlines = [0, 25, 50, 75, 100];
+
+function shortDeptName(name) {
+  return name.replace(" Department Head", "");
+}
+
+const departmentRows = computed(() =>
+  ORG_PARENT_KEYS.flatMap((parentKey) => ORG_CHILDREN_BY_PARENT.get(parentKey) ?? []).map((dept) => {
+    const employeeCount = store.employees.filter((e) => e.unitKerja === dept).length;
+    const target = employeeCount * maxPengisian.value;
+    const voting = filteredSubmissions.value.filter((s) => s.departemen === dept).length;
+    return { key: dept, shortLabel: shortDeptName(dept), target, voting };
+  })
+);
+
+const deptChartMax = computed(() => {
+  return Math.max(1, ...departmentRows.value.flatMap((row) => [row.target, row.voting]));
+});
+
+function deptBarWidth(value) {
+  if (!chartMounted.value || deptChartMax.value === 0) return 0;
+  return Math.max(1.5, Math.round((value / deptChartMax.value) * 1000) / 10);
+}
 </script>
 
 <style scoped>
@@ -398,7 +465,88 @@ const gridlines = [0, 25, 50, 75, 100];
   white-space: nowrap;
 }
 
+.dept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dept-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dept-row-label {
+  width: 190px;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dept-row-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dept-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dept-bar-track {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 16px;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.dept-bar {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.dept-bar-target {
+  background-color: var(--color-border-strong);
+}
+
+.dept-bar-voting {
+  background-color: var(--color-primary);
+}
+
+.dept-bar-value {
+  width: 44px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dept-bar {
+    transition: none;
+  }
+}
+
 @media (max-width: 720px) {
+  .dept-row-label {
+    width: 110px;
+    font-size: 11px;
+  }
+
   .bar {
     width: 20px;
   }

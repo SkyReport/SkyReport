@@ -40,6 +40,7 @@
               <th>Status</th>
               <th>Pengisian</th>
               <th class="col-sisa-kuota">Sisa Kuota</th>
+              <th class="col-action">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -67,9 +68,19 @@
                 </span>
                 <span v-else class="remaining-badge remaining-done">Selesai</span>
               </td>
+              <td class="col-action">
+                <button
+                  type="button"
+                  class="detail-button"
+                  :disabled="fillCountFor(employee) === 0"
+                  @click="openDetail(employee)"
+                >
+                  Detail
+                </button>
+              </td>
             </tr>
             <tr v-if="filteredEmployees.length === 0">
-              <td colspan="6" class="empty-row">Tidak ada pegawai yang cocok.</td>
+              <td colspan="7" class="empty-row">Tidak ada pegawai yang cocok.</td>
             </tr>
           </tbody>
         </table>
@@ -107,11 +118,79 @@
     </template>
 
     <p v-else class="empty-state">Pilih survey tertentu (bukan "Semua Survey") untuk melihat detail pengisian pegawai.</p>
+
+    <Teleport to="body">
+      <div v-if="detailEmployee" class="detail-modal-overlay" @click.self="closeDetail">
+        <div class="detail-modal">
+          <div class="detail-modal-header">
+            <div>
+              <h3 class="detail-modal-title">Bukti Survei — {{ detailEmployee.nama }}</h3>
+              <p class="detail-modal-subtitle">{{ survey?.nama }}</p>
+            </div>
+            <button type="button" class="detail-modal-close" @click="closeDetail">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div v-if="detailSubmissions.length === 0" class="detail-modal-loading">
+            Belum ada bukti untuk survey ini.
+          </div>
+          <table v-else class="detail-table">
+            <thead>
+              <tr>
+                <th class="col-no">No</th>
+                <th>Tanggal</th>
+                <th>Waktu</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(sub, index) in detailSubmissions" :key="sub.id">
+                <tr>
+                  <td class="col-no">{{ index + 1 }}</td>
+                  <td>{{ sub.tanggal }}</td>
+                  <td>{{ submissionTime(sub) || "-" }}</td>
+                  <td>
+                    <button
+                      v-if="sub.fileBukti"
+                      type="button"
+                      class="detail-view-toggle"
+                      @click="toggleImage(sub)"
+                    >
+                      {{ expandedSubmissionId === sub.id ? "Tutup" : "Lihat Bukti" }}
+                    </button>
+                    <span v-else class="detail-deleted-label">Gambar dihapus</span>
+                  </td>
+                </tr>
+                <tr v-if="expandedSubmissionId === sub.id" class="detail-image-row">
+                  <td colspan="4">
+                    <p v-if="imageLoadingId === sub.id" class="detail-modal-loading">Memuat bukti...</p>
+                    <img
+                      v-else-if="imageUrls[sub.id]"
+                      class="detail-list-image-el"
+                      :src="imageUrls[sub.id]"
+                      :alt="`Bukti ${detailEmployee.nama} ${sub.tanggal}`"
+                    />
+                    <p v-else class="detail-image-error">
+                      Gagal memuat bukti.<br />
+                      <span v-if="imageErrors[sub.id]">{{ imageErrors[sub.id] }}</span>
+                    </p>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { BUKTI_BUCKET, supabase } from "../lib/supabaseClient";
 import { jenisPegawaiLabel, useSurveyStore } from "../stores/surveyStore";
 
 const props = defineProps({
@@ -152,6 +231,60 @@ function remainingQuotaFor(employee) {
 
 function isCompleted(employee) {
   return survey.value ? fillCountFor(employee) >= survey.value.maxPengisian : false;
+}
+
+function submissionTime(submission) {
+  if (!submission.createdAt) return "";
+  const date = new Date(submission.createdAt);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+const detailEmployee = ref(null);
+const detailSubmissions = ref([]);
+const expandedSubmissionId = ref(null);
+const imageUrls = ref({});
+const imageLoadingId = ref(null);
+const imageErrors = ref({});
+
+function openDetail(employee) {
+  if (!props.surveyId) return;
+  detailEmployee.value = employee;
+  detailSubmissions.value = store.submissions.filter(
+    (s) => s.surveyId === props.surveyId && s.nama === employee.nama
+  );
+  expandedSubmissionId.value = null;
+  imageUrls.value = {};
+}
+
+function closeDetail() {
+  detailEmployee.value = null;
+  detailSubmissions.value = [];
+  expandedSubmissionId.value = null;
+  imageUrls.value = {};
+}
+
+async function toggleImage(submission) {
+  if (expandedSubmissionId.value === submission.id) {
+    expandedSubmissionId.value = null;
+    return;
+  }
+
+  expandedSubmissionId.value = submission.id;
+
+  if (imageUrls.value[submission.id] || !submission.fileBukti) return;
+
+  imageLoadingId.value = submission.id;
+  const { data, error } = await supabase.storage
+    .from(BUKTI_BUCKET)
+    .createSignedUrl(submission.fileBukti, 300);
+  if (!error) {
+    imageUrls.value = { ...imageUrls.value, [submission.id]: data.signedUrl };
+  } else {
+    imageErrors.value = { ...imageErrors.value, [submission.id]: error.message };
+    console.error("createSignedUrl error:", error, "path:", submission.fileBukti);
+  }
+  imageLoadingId.value = null;
 }
 
 const filteredEmployees = computed(() => {
@@ -441,5 +574,213 @@ const pagedEmployees = computed(() => filteredEmployees.value.slice(pageStart.va
 .pager-page.active {
   background-color: var(--color-primary);
   color: #ffffff;
+}
+
+.col-action {
+  width: 76px;
+  text-align: center !important;
+}
+
+.detail-button {
+  padding: 5px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.detail-button:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: var(--color-primary-light);
+}
+
+.detail-button:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.detail-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: rgba(0, 93, 172, 0.28);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: overlay-fade-in 0.15s ease;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.detail-modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background-color: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modal-pop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.detail-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detail-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.detail-modal-subtitle {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.detail-modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.detail-modal-close:hover {
+  background-color: var(--color-border);
+}
+
+.detail-modal-loading {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.detail-table thead th {
+  text-align: center;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.col-no {
+  width: 40px;
+  color: var(--color-text-muted);
+}
+
+.detail-table tbody td {
+  text-align: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.detail-view-toggle {
+  padding: 5px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.detail-view-toggle:hover {
+  background-color: var(--color-bg);
+}
+
+.detail-deleted-label {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.detail-image-row td {
+  background-color: var(--color-bg);
+  padding: 14px;
+}
+
+.detail-list-image-el {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.detail-image-error {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  text-align: center;
+  padding: 12px;
 }
 </style>

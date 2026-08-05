@@ -11,7 +11,7 @@
       <form class="card" :class="{ shake: shakeError }" @submit.prevent="handleSubmit">
         <div class="card-heading">
           <h1 class="card-title">Login Admin</h1>
-          <p class="card-subtitle">Masuk untuk mengakses Survey Central.</p>
+          <p class="card-subtitle">Masuk untuk mengakses SkyVote.</p>
         </div>
 
         <div class="field field-1">
@@ -93,74 +93,6 @@ async function handleSubmit() {
   background-color: var(--color-bg);
 }
 
-.bg-blob {
-  position: absolute;
-  z-index: -1;
-  width: 46vw;
-  height: 46vw;
-  max-width: 560px;
-  max-height: 560px;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.6;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.bg-blob-1 {
-  top: -12%;
-  left: -10%;
-  background: rgba(212, 227, 255, 1);
-  animation: blob-float-1 20s ease-in-out infinite;
-}
-
-.bg-blob-2 {
-  top: 50%;
-  left: -14%;
-  background: rgba(152, 240, 255, 1);
-  animation: blob-float-2 24s ease-in-out infinite;
-}
-
-.bg-blob-3 {
-  top: -14%;
-  right: -10%;
-  background: rgba(92, 233, 254, 1);
-  animation: blob-float-3 22s ease-in-out infinite;
-}
-
-.bg-blob-4 {
-  bottom: -16%;
-  right: -8%;
-  background: rgba(212, 227, 255, 1);
-  animation: blob-float-4 26s ease-in-out infinite;
-}
-
-@keyframes blob-float-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(5vw, 4vh) scale(1.12); }
-}
-
-@keyframes blob-float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-4vw, -6vh) scale(1.08); }
-}
-
-@keyframes blob-float-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-5vw, 5vh) scale(1.1); }
-}
-
-@keyframes blob-float-4 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(4vw, -4vh) scale(1.1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bg-blob {
-    animation: none;
-  }
-}
-
 .main-content {
   flex: 1;
   display: flex;
@@ -174,9 +106,11 @@ async function handleSubmit() {
   max-width: 400px;
   padding: 28px;
   border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
   gap: 20px;

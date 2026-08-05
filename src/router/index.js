@@ -37,7 +37,7 @@ const routes = [
         path: "management",
         name: "admin-survey-management",
         component: () => import("../adminSurveyManagement.vue"),
-        meta: { title: "Survey Data" },
+        meta: { title: "Manage Survey" },
       },
       {
         path: "buat-survey/:id?",
@@ -56,6 +56,12 @@ const routes = [
         name: "admin-department-detail",
         component: () => import("../adminDepartmentDetail.vue"),
         meta: { title: "Detail Survey" },
+      },
+      {
+        path: "hapus-gambar",
+        name: "admin-manage-images",
+        component: () => import("../adminManageImages.vue"),
+        meta: { title: "Delete Image" },
       },
     ],
   },

@@ -3,7 +3,7 @@
     <div class="page-heading">
       <div>
         <h1 class="page-title">Kelola Survei</h1>
-        <p class="page-subtitle">Create and manage internal employee surveys efficiently.</p>
+        <p class="page-subtitle">Buat dan kelola survei internal pegawai dengan mudah.</p>
       </div>
       <RouterLink to="/admin/buat-survey" class="btn-add">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">

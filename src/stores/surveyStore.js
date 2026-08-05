@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { compressImage } from "../lib/imageCompress";
 import { BUKTI_BUCKET, supabase } from "../lib/supabaseClient";
 
 // Display-only relabeling: "Non-Organik" pegawai are shown as "TAD" in the
@@ -49,6 +50,7 @@ function mapSubmission(row) {
     jenisPegawai: row.jenis_pegawai,
     departemen: row.departemen,
     fileBukti: row.file_bukti,
+    createdAt: row.created_at,
   };
 }
 
@@ -265,10 +267,11 @@ export const useSurveyStore = defineStore("survey", {
     },
 
     async addSubmission({ nama, tanggal, surveyId, jenisPegawai, departemen, file }) {
-      const path = `${surveyId}/${Date.now()}-${file.name}`;
+      const compressedFile = await compressImage(file);
+      const path = `${surveyId}/${Date.now()}-${compressedFile.name}`;
       const { error: uploadError } = await supabase.storage
         .from(BUKTI_BUCKET)
-        .upload(path, file);
+        .upload(path, compressedFile);
       if (uploadError) {
         throw new Error(`Gagal mengunggah bukti: ${uploadError.message}`);
       }
@@ -297,6 +300,57 @@ export const useSurveyStore = defineStore("survey", {
       this.submissions.push(submission);
       this.lastSubmission = submission;
       return submission;
+    },
+
+    // Deletes just the evidence photo (storage object) and clears
+    // file_bukti on the submission — the submission row itself stays, so
+    // participation counts/quota are unaffected. Used by admins to free up
+    // storage space without losing the record of who submitted when.
+    async deleteSubmissionImage(submissionId) {
+      const submission = this.submissions.find((s) => s.id === submissionId);
+      if (!submission?.fileBukti) return;
+
+      const { error: removeError } = await supabase.storage
+        .from(BUKTI_BUCKET)
+        .remove([submission.fileBukti]);
+      if (removeError) {
+        throw new Error(`Gagal menghapus file: ${removeError.message}`);
+      }
+
+      const { error: updateError } = await supabase
+        .from("submissions")
+        .update({ file_bukti: null })
+        .eq("id", submissionId);
+      if (updateError) throw new Error(updateError.message);
+
+      submission.fileBukti = null;
+    },
+
+    // Bulk version of deleteSubmissionImage, scoped to one survey — used by
+    // the "Hapus Semua Gambar" button so admins can clear out an entire
+    // survey's evidence photos in one go instead of one-by-one.
+    async deleteAllImagesForSurvey(surveyId) {
+      const targets = this.submissions.filter((s) => s.surveyId === surveyId && s.fileBukti);
+      if (targets.length === 0) return 0;
+
+      const paths = targets.map((s) => s.fileBukti);
+      const { error: removeError } = await supabase.storage.from(BUKTI_BUCKET).remove(paths);
+      if (removeError) {
+        throw new Error(`Gagal menghapus file: ${removeError.message}`);
+      }
+
+      const ids = targets.map((s) => s.id);
+      const { error: updateError } = await supabase
+        .from("submissions")
+        .update({ file_bukti: null })
+        .in("id", ids);
+      if (updateError) throw new Error(updateError.message);
+
+      targets.forEach((s) => {
+        s.fileBukti = null;
+      });
+
+      return targets.length;
     },
 
     async markNotificationRead(notificationId) {

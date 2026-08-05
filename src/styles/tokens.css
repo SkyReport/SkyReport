@@ -38,6 +38,15 @@
   --shadow-lg: 0px 10px 30px rgba(0, 0, 0, 0.15);
 
   --font-sans: "Inter", "Inter-Regular", Helvetica, Arial, sans-serif;
+
+  /* Glassmorphism surface tokens — reuse the same base colors (primary,
+     border, text) everywhere, just rendered semi-transparent + blurred. */
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-blur: 20px;
+  --glass-sidebar-bg: rgba(15, 27, 45, 0.78);
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
 }
 
 * {
@@ -129,8 +138,97 @@ input[type="submit"]:active:not(:disabled),
 .board-card,
 .report-card,
 .detail-card,
-.form-card {
+.form-card,
+.chart-card {
   animation: page-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Glass surfaces ───────────────────────────────────────────────────────
+   Every top-level content card across the admin pages shares these class
+   names, so one rule gives the whole app a consistent frosted-glass look
+   (semi-transparent + blurred) without touching any base color value. */
+.board-card,
+.report-card,
+.detail-card,
+.form-card,
+.chart-card {
+  background-color: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+/* ── Shared floating background blobs ────────────────────────────────────
+   One canonical definition of the animated color blobs used behind glass
+   surfaces (public page, login, admin layout). Components just drop in
+   <div class="bg-blob bg-blob-1..4" /> — no per-file CSS needed. */
+.bg-blob {
+  position: absolute;
+  z-index: -1;
+  width: 46vw;
+  height: 46vw;
+  max-width: 560px;
+  max-height: 560px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.6;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.bg-blob-1 {
+  top: -12%;
+  left: -10%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-1 20s ease-in-out infinite;
+}
+
+.bg-blob-2 {
+  top: 50%;
+  left: -14%;
+  background: rgba(152, 240, 255, 1);
+  animation: blob-float-2 24s ease-in-out infinite;
+}
+
+.bg-blob-3 {
+  top: -14%;
+  right: -10%;
+  background: rgba(92, 233, 254, 1);
+  animation: blob-float-3 22s ease-in-out infinite;
+}
+
+.bg-blob-4 {
+  bottom: -16%;
+  right: -8%;
+  background: rgba(212, 227, 255, 1);
+  animation: blob-float-4 26s ease-in-out infinite;
+}
+
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, 4vh) scale(1.12); }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4vw, -6vh) scale(1.08); }
+}
+
+@keyframes blob-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5vw, 5vh) scale(1.1); }
+}
+
+@keyframes blob-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, -4vh) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob {
+    animation: none !important;
+  }
 }
 
 .board-card,
@@ -152,7 +250,8 @@ input[type="submit"]:active:not(:disabled),
   .board-card,
   .report-card,
   .detail-card,
-  .form-card {
+  .form-card,
+  .chart-card {
     animation: none !important;
   }
 }

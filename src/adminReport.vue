@@ -148,9 +148,9 @@
         <div class="report-card">
           <div class="card-header">
             <div>
-              <h2 class="card-title">Rekapitulasi Partisipasi per Departemen</h2>
+              <h2 class="card-title">Rekapitulasi Partisipasi per Divisi</h2>
               <p class="card-subtitle">
-                Sebaran pengisian survey berdasarkan unit kerja / departemen.
+                Sebaran pengisian survey berdasarkan unit kerja / divisi.
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@
               <thead>
                 <tr class="group-row">
                   <th rowspan="2">No</th>
-                  <th rowspan="2">Departemen</th>
+                  <th rowspan="2">Divisi</th>
                   <th colspan="4">Pegawai Organik</th>
                   <th colspan="4">Pegawai TAD</th>
                   <th colspan="5">Total</th>
@@ -334,7 +334,7 @@
               {{ deptTable.rows.value.length === 0 ? 0 : deptTable.pageStart.value + 1 }}-{{
                 deptTable.pageEnd.value
               }}
-              dari {{ deptTable.rows.value.length }} departemen
+              dari {{ deptTable.rows.value.length }} divisi
             </span>
             <div class="pagination-actions">
               <button
@@ -667,7 +667,7 @@ function exportToPdf() {
   const surveyLabel = selectedSurveyFilter.value ? selectedSurveyFilter.value.nama : "Semua Survey";
 
   doc.setFontSize(14);
-  doc.text("Laporan Hasil Survei - Survey Central", 14, 15);
+  doc.text("Laporan Hasil Survei - SkyVote", 14, 15);
   doc.setFontSize(10);
   doc.text(`Survey: ${surveyLabel}`, 14, 21);
   doc.text(`Diekspor pada: ${new Date().toLocaleString("id-ID")}`, 14, 26);
@@ -696,11 +696,11 @@ function exportToPdf() {
   });
 
   const deptHead = JSON.parse(JSON.stringify(reportGroupHead));
-  deptHead[0][1].content = "Departemen";
+  deptHead[0][1].content = "Divisi";
 
   doc.addPage();
   doc.setFontSize(12);
-  doc.text("Rekapitulasi Partisipasi per Departemen", 14, 15);
+  doc.text("Rekapitulasi Partisipasi per Divisi", 14, 15);
   autoTable(doc, {
     head: deptHead,
     body: buildReportBody(deptTable.rows.value, deptTable.totals.value, (key) => key),
@@ -918,6 +918,10 @@ function exportToPdf() {
 .report-table thead .group-row th:first-child,
 .report-table thead .group-row th:nth-child(2) {
   text-align: left;
+}
+
+.report-table.dept-table thead .group-row th:nth-child(2) {
+  text-align: center;
 }
 
 .report-table tbody td {

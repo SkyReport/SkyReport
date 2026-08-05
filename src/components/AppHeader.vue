@@ -2,7 +2,7 @@
   <header class="app-header">
     <div class="brand">
       <slot name="brand">
-        <span class="brand-title">Survey Central</span>
+        <span class="brand-title">SkyVote</span>
         <span class="brand-subtitle">InJourney Management System</span>
       </slot>
     </div>
