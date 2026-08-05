@@ -1,12 +1,24 @@
 -- Survey Central -- import real employee roster (Organik + TAD/outsourcing)
--- extracted from HR PDF exports, reconciled against the existing org-chart
--- leaf departments (18 Department Heads). Employees belonging to units not
--- yet modeled in orgStructure.js (Finance Section, Airport Aeronautical,
--- Human Capital Solution & Business Support, Support Services/PJP2U,
--- General Manager/Project Management office, and division-level roles) are
--- intentionally excluded -- see chat discussion. Run this AFTER 007.
+-- extracted from HR PDF exports, reconciled against the existing org-chart.
+-- Employees belonging to units not yet modeled in orgStructure.js at all
+-- (Finance Section, Airport Aeronautical, Human Capital Solution & Business
+-- Support, Support Services/PJP2U) are intentionally excluded -- see chat
+-- discussion. GM/Project Management and the 4 Division Head roles ARE
+-- included, mapped onto their ORG_STRUCTURE parent-key name directly (they
+-- now double as a "department" of their own). Run this AFTER 007.
 
 begin;
+
+-- Division/branch-level parent keys that a handful of real employees (GM,
+-- Project Management, Division Heads) belong to directly, not to any of the
+-- 18 Department Head leaves -- add them as departments in their own right.
+insert into departments (nama) values
+  ('General Manager'),
+  ('Airport Operation, Services & Security'),
+  ('Airport Technical'),
+  ('Airport Commercial'),
+  ('Airport Quality & Safety Management System')
+on conflict (nama) do nothing;
 
 -- Remove the old placeholder/mock employees seeded in 003_seed_data.sql --
 -- they have no real NIP and are being replaced by the real roster below.
@@ -16,6 +28,9 @@ delete from employees where nip is null;
 
 -- Insert the real employee roster.
 insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
+  ('20240705', 'Muhammad Thamrin', 'General Manager', 'Organik'),
+  ('20241527', 'Ratih Rosini Komara', 'General Manager', 'Organik'),
+  ('20240784', 'Chrismawan Andry Wibowo', 'General Manager', 'Organik'),
   ('20240294', 'Didik Hermanto', 'Airport Operation Center Head', 'Organik'),
   ('20240332', 'Mulyadi Suparjo', 'Airport Operation Center Head', 'Organik'),
   ('20240662', 'I Made Sumardika', 'Airport Operation Center Head', 'Organik'),
@@ -26,6 +41,11 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20243496', 'Andhi Wijaya', 'Legal & Compliance Department Head', 'Organik'),
   ('20242735', 'Rita Nawangsari Pamungkas', 'Airport Environment Department Head', 'Organik'),
   ('20241960', 'Moh Arif Wahyuliyanto', 'Airport Environment Department Head', 'Organik'),
+  ('20240200', 'Rahmat Febrian Syahrani', 'Airport Operation, Services & Security', 'Organik'),
+  ('20240722', 'Pri Arip Legowo', 'Airport Operation, Services & Security', 'Organik'),
+  ('20241318', 'Danang Triyanto', 'Airport Operation, Services & Security', 'Organik'),
+  ('20241366', 'M. Chafid Islahul Abid', 'Airport Operation, Services & Security', 'Organik'),
+  ('20241418', 'Rahmat Riadi H.B.', 'Airport Operation, Services & Security', 'Organik'),
   ('20241415', 'Achmad Faruq', 'Airport Operation Airside Department Head', 'Organik'),
   ('20241712', 'Danang Agung Wijayanto', 'Airport Operation Airside Department Head', 'Organik'),
   ('20241735', 'Maryanto Muljo Suharto', 'Airport Operation Airside Department Head', 'Organik'),
@@ -133,6 +153,7 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20246589', 'Kamelia', 'Airport Security Screening Department Head', 'Organik'),
   ('20246709', 'Nia Agustina', 'Airport Security Screening Department Head', 'Organik'),
   ('20240657', 'Tamsul Sadikin', 'Airport Rescue & Fire Fighting Department Head', 'Organik'),
+  ('20241756', 'Eddy Syamsul B', 'Airport Technical', 'Organik'),
   ('20244342', 'Dika Arwinda Sulviari', 'Airport Facilities Department Head', 'Organik'),
   ('20246125', 'Adithya Maulana Arifin', 'Airport Facilities Department Head', 'Organik'),
   ('20242774', 'Novita Robby Sartika', 'Airport Facilities Department Head', 'Organik'),
@@ -163,6 +184,7 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20242055', 'Muh. Hatta Hidayatullah', 'Airport Technology Department Head', 'Organik'),
   ('20243012', 'Yondha Agung Prasetyo', 'Airport Technology Department Head', 'Organik'),
   ('20246528', 'Mukhamad Erwin Zakariya Kurniawan', 'Airport Technology Department Head', 'Organik'),
+  ('20240627', 'Jarot Handoko', 'Airport Commercial', 'Organik'),
   ('20244287', 'Khairunnisa Indah Ningrum', 'Aero Commercial Department Head', 'Organik'),
   ('20240505', 'Erina Armelia Septianti', 'Aero Commercial Department Head', 'Organik'),
   ('20240615', 'Fitri Ardiani', 'Aero Commercial Department Head', 'Organik'),
@@ -181,6 +203,7 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20241594', 'Prihati Muji Lestari', 'Asset Management & General Services Department Head', 'Organik'),
   ('20240479', 'Samhita Danarti Cahyawati', 'Asset Management & General Services Department Head', 'Organik'),
   ('20246349', 'Yohanis Rumlus Lewokerore Hering', 'Asset Management & General Services Department Head', 'Organik'),
+  ('20241031', 'Indra Fandy Parlaungan Nasution', 'Airport Quality & Safety Management System', 'Organik'),
   ('20244250', 'Anang Eko Pribadi', 'Safety Management System & OHS Department Head', 'Organik'),
   ('20244460', 'Nurdiyanto', 'Safety Management System & OHS Department Head', 'Organik'),
   ('20241423', 'Verika Fitri Andriana', 'Airport Quality Control Department Head', 'Organik'),

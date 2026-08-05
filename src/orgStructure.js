@@ -6,7 +6,12 @@
 export const ORG_STRUCTURE = [
   {
     key: "General Manager",
+    // "General Manager" also appears as its own child here: the GM plus the
+    // Project Management staff report directly to this office rather than to
+    // any Department Head, so they need a department of their own that's
+    // literally named after the parent group.
     children: [
+      "General Manager",
       "Airport Operation Center Head",
       "Branch Communication & CSR Department Head",
       "Legal & Compliance Department Head",
@@ -16,6 +21,7 @@ export const ORG_STRUCTURE = [
   {
     key: "Airport Quality & Safety Management System",
     children: [
+      "Airport Quality & Safety Management System",
       "Safety Management System & OHS Department Head",
       "Airport Quality Control Department Head",
     ],
@@ -23,6 +29,7 @@ export const ORG_STRUCTURE = [
   {
     key: "Airport Operation, Services & Security",
     children: [
+      "Airport Operation, Services & Security",
       "Airport Operation Airside Department Head",
       "Airport Operation Landside & Terminal Department Head",
       "Airport Services Improvement Department Head",
@@ -34,6 +41,7 @@ export const ORG_STRUCTURE = [
   {
     key: "Airport Technical",
     children: [
+      "Airport Technical",
       "Airport Facilities Department Head",
       "Airport Equipment Department Head",
       "Airport Technology Department Head",
@@ -42,7 +50,11 @@ export const ORG_STRUCTURE = [
   },
   {
     key: "Airport Commercial",
-    children: ["Aero Commercial Department Head", "Non-Aero Commercial Department Head"],
+    children: [
+      "Airport Commercial",
+      "Aero Commercial Department Head",
+      "Non-Aero Commercial Department Head",
+    ],
   },
 ];
 
