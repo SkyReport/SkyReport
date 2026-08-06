@@ -1,23 +1,25 @@
 -- Survey Central -- import real employee roster (Organik + TAD/outsourcing)
 -- extracted from HR PDF exports, reconciled against the existing org-chart.
--- Employees belonging to units not yet modeled in orgStructure.js at all
--- (Finance Section, Airport Aeronautical, Human Capital Solution & Business
--- Support, Support Services/PJP2U) are intentionally excluded -- see chat
--- discussion. GM/Project Management and the 4 Division Head roles ARE
--- included, mapped onto their ORG_STRUCTURE parent-key name directly (they
--- now double as a "department" of their own). Run this AFTER 007.
+-- Every row from both PDFs is now included: GM/Project Management, each
+-- division's Division Head role, and units with no Department Head yet
+-- (Finance Section, Airport Aeronautical, Support Services/PJP2U/HC
+-- Solution) are all bucketed as their own Department-Head-equivalent leaf
+-- under the "General Manager" group -- see orgStructure.js and chat
+-- discussion. Run this AFTER 007.
 
 begin;
 
--- Division/branch-level parent keys that a handful of real employees (GM,
--- Project Management, Division Heads) belong to directly, not to any of the
--- 18 Department Head leaves -- add them as departments in their own right.
+-- New Department-Head-equivalent leaves that sit under "General Manager"
+-- in orgStructure.js (division heads + units with no Department Head yet).
 insert into departments (nama) values
   ('General Manager'),
-  ('Airport Operation, Services & Security'),
-  ('Airport Technical'),
-  ('Airport Commercial'),
-  ('Airport Quality & Safety Management System')
+  ('Airport Operation, Services & Security Division Head'),
+  ('Airport Technical Division Head'),
+  ('Airport Commercial Division Head'),
+  ('Airport Quality & Safety Management System Division Head'),
+  ('Finance Section'),
+  ('Airport Aeronautical'),
+  ('Support Services')
 on conflict (nama) do nothing;
 
 -- Remove the old placeholder/mock employees seeded in 003_seed_data.sql --
@@ -41,11 +43,11 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20243496', 'Andhi Wijaya', 'Legal & Compliance Department Head', 'Organik'),
   ('20242735', 'Rita Nawangsari Pamungkas', 'Airport Environment Department Head', 'Organik'),
   ('20241960', 'Moh Arif Wahyuliyanto', 'Airport Environment Department Head', 'Organik'),
-  ('20240200', 'Rahmat Febrian Syahrani', 'Airport Operation, Services & Security', 'Organik'),
-  ('20240722', 'Pri Arip Legowo', 'Airport Operation, Services & Security', 'Organik'),
-  ('20241318', 'Danang Triyanto', 'Airport Operation, Services & Security', 'Organik'),
-  ('20241366', 'M. Chafid Islahul Abid', 'Airport Operation, Services & Security', 'Organik'),
-  ('20241418', 'Rahmat Riadi H.B.', 'Airport Operation, Services & Security', 'Organik'),
+  ('20240200', 'Rahmat Febrian Syahrani', 'Airport Operation, Services & Security Division Head', 'Organik'),
+  ('20240722', 'Pri Arip Legowo', 'Airport Operation, Services & Security Division Head', 'Organik'),
+  ('20241318', 'Danang Triyanto', 'Airport Operation, Services & Security Division Head', 'Organik'),
+  ('20241366', 'M. Chafid Islahul Abid', 'Airport Operation, Services & Security Division Head', 'Organik'),
+  ('20241418', 'Rahmat Riadi H.B.', 'Airport Operation, Services & Security Division Head', 'Organik'),
   ('20241415', 'Achmad Faruq', 'Airport Operation Airside Department Head', 'Organik'),
   ('20241712', 'Danang Agung Wijayanto', 'Airport Operation Airside Department Head', 'Organik'),
   ('20241735', 'Maryanto Muljo Suharto', 'Airport Operation Airside Department Head', 'Organik'),
@@ -153,7 +155,7 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20246589', 'Kamelia', 'Airport Security Screening Department Head', 'Organik'),
   ('20246709', 'Nia Agustina', 'Airport Security Screening Department Head', 'Organik'),
   ('20240657', 'Tamsul Sadikin', 'Airport Rescue & Fire Fighting Department Head', 'Organik'),
-  ('20241756', 'Eddy Syamsul B', 'Airport Technical', 'Organik'),
+  ('20241756', 'Eddy Syamsul B', 'Airport Technical Division Head', 'Organik'),
   ('20244342', 'Dika Arwinda Sulviari', 'Airport Facilities Department Head', 'Organik'),
   ('20246125', 'Adithya Maulana Arifin', 'Airport Facilities Department Head', 'Organik'),
   ('20242774', 'Novita Robby Sartika', 'Airport Facilities Department Head', 'Organik'),
@@ -184,7 +186,7 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20242055', 'Muh. Hatta Hidayatullah', 'Airport Technology Department Head', 'Organik'),
   ('20243012', 'Yondha Agung Prasetyo', 'Airport Technology Department Head', 'Organik'),
   ('20246528', 'Mukhamad Erwin Zakariya Kurniawan', 'Airport Technology Department Head', 'Organik'),
-  ('20240627', 'Jarot Handoko', 'Airport Commercial', 'Organik'),
+  ('20240627', 'Jarot Handoko', 'Airport Commercial Division Head', 'Organik'),
   ('20244287', 'Khairunnisa Indah Ningrum', 'Aero Commercial Department Head', 'Organik'),
   ('20240505', 'Erina Armelia Septianti', 'Aero Commercial Department Head', 'Organik'),
   ('20240615', 'Fitri Ardiani', 'Aero Commercial Department Head', 'Organik'),
@@ -203,15 +205,30 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('20241594', 'Prihati Muji Lestari', 'Asset Management & General Services Department Head', 'Organik'),
   ('20240479', 'Samhita Danarti Cahyawati', 'Asset Management & General Services Department Head', 'Organik'),
   ('20246349', 'Yohanis Rumlus Lewokerore Hering', 'Asset Management & General Services Department Head', 'Organik'),
-  ('20241031', 'Indra Fandy Parlaungan Nasution', 'Airport Quality & Safety Management System', 'Organik'),
+  ('20241031', 'Indra Fandy Parlaungan Nasution', 'Airport Quality & Safety Management System Division Head', 'Organik'),
   ('20244250', 'Anang Eko Pribadi', 'Safety Management System & OHS Department Head', 'Organik'),
   ('20244460', 'Nurdiyanto', 'Safety Management System & OHS Department Head', 'Organik'),
   ('20241423', 'Verika Fitri Andriana', 'Airport Quality Control Department Head', 'Organik'),
   ('20247805', 'Shafira Balqis', 'Airport Quality Control Department Head', 'Organik'),
+  ('2407100', 'Prita Budiningsih', 'Finance Section', 'Non-Organik'),
   ('2202269', 'Matheas Minardi S', 'Airport Facilities Department Head', 'Non-Organik'),
+  ('2407103', 'Putri Rizka Dewi Linda', 'General Manager', 'Non-Organik'),
   ('2403690', 'Fachry Haji Makkiyah', 'Safety Management System & OHS Department Head', 'Non-Organik'),
   ('2500890', 'Eky Allif Viyanto', 'Airport Facilities Department Head', 'Non-Organik'),
   ('2403587', 'Wulan Damayanti', 'Airport Facilities Department Head', 'Non-Organik'),
+  ('2407109', 'Raselin Inge Juanita', 'Airport Aeronautical', 'Non-Organik'),
+  ('2407137', 'Tonny Setya Nugraha', 'Airport Aeronautical', 'Non-Organik'),
+  ('2202278', 'Novan Fajar Saktya', 'Airport Aeronautical', 'Non-Organik'),
+  ('2202268', 'Martika Agustina', 'Airport Aeronautical', 'Non-Organik'),
+  ('2301459', 'Irvani Cahyo Utomo', 'Airport Aeronautical', 'Non-Organik'),
+  ('2202308', 'Setyo Wibowo', 'Airport Aeronautical', 'Non-Organik'),
+  ('2407008', 'Adhika Satya Wicaksana', 'Airport Aeronautical', 'Non-Organik'),
+  ('2405330', 'Ginanjar Wahyu Kuncoro', 'Airport Aeronautical', 'Non-Organik'),
+  ('2301457', 'Muhammad Wali Al-Ckhalidy', 'Airport Aeronautical', 'Non-Organik'),
+  ('2405328', 'Iwan Rifai', 'Airport Aeronautical', 'Non-Organik'),
+  ('2210402', 'Nadika Raras Swadesi', 'Airport Aeronautical', 'Non-Organik'),
+  ('2202082', 'Nur Amin Baharsyah', 'Airport Aeronautical', 'Non-Organik'),
+  ('2209690', 'Ronal Suryana', 'Airport Aeronautical', 'Non-Organik'),
   ('2407134', 'Tavik Nurcahya', 'Airport Equipment Department Head', 'Non-Organik'),
   ('2501836', 'Choiruman Miftah Nurhadi', 'Airport Equipment Department Head', 'Non-Organik'),
   ('2407123', 'Sugiono', 'Airport Equipment Department Head', 'Non-Organik'),
@@ -393,7 +410,12 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('2407081', 'Muh Imran', 'Airport Security Protection Department Head', 'Non-Organik'),
   ('2208703', 'Agrita Parama Yudha', 'Branch Communication & CSR Department Head', 'Non-Organik'),
   ('2301000', 'Miwa Handayani', 'Branch Communication & CSR Department Head', 'Non-Organik'),
+  ('2405329', 'Riza Yoaniza', 'Finance Section', 'Non-Organik'),
+  ('2407048', 'Esti Wulansari', 'Finance Section', 'Non-Organik'),
+  ('2301458', 'Indah Puspitasari', 'Finance Section', 'Non-Organik'),
+  ('2407039', 'Diprita Cantika Ananda', 'Finance Section', 'Non-Organik'),
   ('2406731', 'Sunardi', 'Asset Management & General Services Department Head', 'Non-Organik'),
+  ('2500901', 'Sigit Putro Santoso', 'General Manager', 'Non-Organik'),
   ('2209694', 'Candra Achmad Pria Pandega', 'Asset Management & General Services Department Head', 'Non-Organik'),
   ('2101769', 'Asri Wibowo', 'Asset Management & General Services Department Head', 'Non-Organik'),
   ('2603260', 'Setyo Pramudyanto', 'Asset Management & General Services Department Head', 'Non-Organik'),
@@ -536,7 +558,13 @@ insert into employees (nip, nama, unit_kerja, jenis_pegawai) values
   ('2407009', 'Aditya Warman', 'Airport Security Screening Department Head', 'Non-Organik'),
   ('2407120', 'Sodik Joko Purnomo', 'Airport Security Screening Department Head', 'Non-Organik'),
   ('2202232', 'Dwi Latri Sutoro', 'Airport Security Screening Department Head', 'Non-Organik'),
-  ('2503700', 'Rafdi Fitra Riza', 'Airport Security Protection Department Head', 'Non-Organik')
+  ('2503700', 'Rafdi Fitra Riza', 'Airport Security Protection Department Head', 'Non-Organik'),
+  ('2504521', 'Putry Ramanda Sani', 'Support Services', 'Non-Organik'),
+  ('2504515', 'Finisia Pristika', 'Support Services', 'Non-Organik'),
+  ('2504516', 'Nining Riawati', 'Support Services', 'Non-Organik'),
+  ('2504517', 'Panca Putri Hikmawati', 'Support Services', 'Non-Organik'),
+  ('2504518', 'Rahmat Hidayat', 'Support Services', 'Non-Organik'),
+  ('2500868', 'Kinanti Swari Kitara', 'Support Services', 'Non-Organik')
 on conflict (nama) do update set nip = excluded.nip, unit_kerja = excluded.unit_kerja, jenis_pegawai = excluded.jenis_pegawai;
 
 commit;
