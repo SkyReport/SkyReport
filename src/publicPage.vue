@@ -5,6 +5,29 @@
     <div class="bg-blob bg-blob-3" aria-hidden="true" />
     <div class="bg-blob bg-blob-4" aria-hidden="true" />
 
+    <svg class="bg-flower bg-flower-1" viewBox="0 0 24 24" aria-hidden="true">
+      <g>
+        <ellipse cx="12" cy="6" rx="3" ry="5" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(120 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(180 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(240 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(300 12 12)" />
+        <circle cx="12" cy="12" r="2.4" />
+      </g>
+    </svg>
+    <svg class="bg-flower bg-flower-2" viewBox="0 0 24 24" aria-hidden="true">
+      <g>
+        <ellipse cx="12" cy="6" rx="3" ry="5" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(120 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(180 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(240 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(300 12 12)" />
+        <circle cx="12" cy="12" r="2.4" />
+      </g>
+    </svg>
+
     <AppHeader />
 
     <main class="main-content">
@@ -55,7 +78,8 @@
               v-model="form.tanggal"
               type="date"
               class="input"
-              :max="today"
+              :min="minDate"
+              :max="maxDate"
               required
             />
           </div>
@@ -233,6 +257,15 @@ onBeforeUnmount(() => {
 
 const selectedSurvey = computed(() => store.findSurvey(selectedSurveyId.value));
 
+// Date picker is clamped to the selected survey's own period — can't log
+// evidence for a date before it started or after it ended, and never for a
+// date in the future.
+const minDate = computed(() => selectedSurvey.value?.tanggalMulai || undefined);
+const maxDate = computed(() => {
+  const surveyEnd = selectedSurvey.value?.tanggalSelesai;
+  return surveyEnd && surveyEnd < today ? surveyEnd : today;
+});
+
 const employeeSubmissionCount = computed(() =>
   selectedSurveyId.value && selectedEmployee.value
     ? store.submissionCountForEmployeeSurvey(selectedSurveyId.value, selectedEmployee.value.nama)
@@ -260,6 +293,8 @@ const canSubmit = computed(
 watch(selectedSurveyId, () => {
   form.file = null;
   if (fileInput.value) fileInput.value.value = "";
+  if (minDate.value && form.tanggal < minDate.value) form.tanggal = minDate.value;
+  if (maxDate.value && form.tanggal > maxDate.value) form.tanggal = maxDate.value;
 });
 
 function triggerFilePicker() {
@@ -332,6 +367,56 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
+}
+
+/* ── Drifting spinning-flower silhouettes ────────────────────────────────
+   Purely decorative, sits behind the glass card at the same z-index/style
+   as the bg-blobs (translucent, brand accent colors, no new palette). */
+.bg-flower {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.bg-flower-1 {
+  top: 20%;
+  left: -8%;
+  width: 88px;
+  height: 88px;
+  fill: var(--color-primary-light);
+  animation: flower-drift-1 24s linear infinite;
+}
+
+.bg-flower-2 {
+  top: 64%;
+  left: -8%;
+  width: 60px;
+  height: 60px;
+  fill: var(--color-accent-cyan-strong);
+  animation: flower-drift-2 32s linear infinite;
+  animation-delay: 8s;
+}
+
+@keyframes flower-drift-1 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.4; }
+  92% { opacity: 0.4; }
+  100% { transform: translate(125vw, -18vh) rotate(1080deg); opacity: 0; }
+}
+
+@keyframes flower-drift-2 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.45; }
+  92% { opacity: 0.45; }
+  100% { transform: translate(120vw, 16vh) rotate(-1080deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-flower {
+    animation: none !important;
+    display: none;
+  }
 }
 
 .card {
@@ -434,12 +519,14 @@ async function handleSubmit() {
 .card-title {
   color: var(--color-text);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .card-subtitle {
   color: var(--color-text-secondary);
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .form {
@@ -463,7 +550,8 @@ async function handleSubmit() {
 .field-label {
   color: var(--color-text-secondary);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .select,

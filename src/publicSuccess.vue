@@ -233,12 +233,14 @@ const submissionTime = computed(() => {
 .card-title {
   color: var(--color-text);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .card-subtitle {
   color: var(--color-text-secondary);
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .summary {

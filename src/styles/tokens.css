@@ -37,7 +37,7 @@
   --shadow-md: 0px 4px 20px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0px 10px 30px rgba(0, 0, 0, 0.15);
 
-  --font-sans: "Inter", "Inter-Regular", Helvetica, Arial, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", Helvetica, Arial, sans-serif;
 
   /* Glassmorphism surface tokens — reuse the same base colors (primary,
      border, text) everywhere, just rendered semi-transparent + blurred. */
@@ -58,6 +58,10 @@ body {
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -65,6 +69,14 @@ h2,
 h3,
 p {
   margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 /* ── Global micro-interactions ─────────────────────────────────────────

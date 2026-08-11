@@ -1,5 +1,28 @@
 <template>
   <aside class="sidebar">
+    <svg class="sidebar-flower sidebar-flower-1" viewBox="0 0 24 24" aria-hidden="true">
+      <g>
+        <ellipse cx="12" cy="6" rx="3" ry="5" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(120 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(180 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(240 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(300 12 12)" />
+        <circle cx="12" cy="12" r="2.4" />
+      </g>
+    </svg>
+    <svg class="sidebar-flower sidebar-flower-2" viewBox="0 0 24 24" aria-hidden="true">
+      <g>
+        <ellipse cx="12" cy="6" rx="3" ry="5" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(120 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(180 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(240 12 12)" />
+        <ellipse cx="12" cy="6" rx="3" ry="5" transform="rotate(300 12 12)" />
+        <circle cx="12" cy="12" r="2.4" />
+      </g>
+    </svg>
+
     <div class="sidebar-brand">
       <div class="brand-mark">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -71,7 +94,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <button class="nav-item nav-item-plain" type="button" @click="handleLogout">
+      <button class="nav-item nav-item-plain" type="button" @click="showLogoutConfirm = true">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <path
@@ -86,17 +109,32 @@
         Logout
       </button>
     </div>
+
+    <ConfirmDialog
+      :visible="showLogoutConfirm"
+      title="Logout dari SkyVote?"
+      message="Anda perlu login lagi untuk mengakses halaman admin."
+      confirm-text="Ya, Logout"
+      cancel-text="Batal"
+      danger
+      @confirm="handleLogout"
+      @cancel="showLogoutConfirm = false"
+    />
   </aside>
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/authStore";
+import ConfirmDialog from "./ConfirmDialog.vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
+const showLogoutConfirm = ref(false);
 
 async function handleLogout() {
+  showLogoutConfirm.value = false;
   await authStore.signOut();
   router.push("/admin/login");
 }
@@ -109,6 +147,7 @@ async function handleLogout() {
   left: 0;
   bottom: 0;
   width: 256px;
+  overflow: hidden;
   background-color: var(--glass-sidebar-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -116,6 +155,56 @@ async function handleLogout() {
   display: flex;
   flex-direction: column;
   z-index: 20;
+}
+
+/* ── Drifting spinning-flower silhouettes ────────────────────────────────
+   Same decorative motif as the public page, tuned for this narrow, tall
+   panel (px-based travel instead of vw/vh, muted so nav text stays legible). */
+.sidebar-flower {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.sidebar-flower-1 {
+  top: 42%;
+  left: -14%;
+  width: 64px;
+  height: 64px;
+  fill: rgba(255, 255, 255, 0.4);
+  animation: sidebar-flower-drift-1 20s linear infinite;
+}
+
+.sidebar-flower-2 {
+  top: 58%;
+  left: 60%;
+  width: 46px;
+  height: 46px;
+  fill: var(--color-accent-cyan-strong);
+  animation: sidebar-flower-drift-2 26s linear infinite;
+  animation-delay: 6s;
+}
+
+@keyframes sidebar-flower-drift-1 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.35; }
+  90% { opacity: 0.35; }
+  100% { transform: translate(220px, -380px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes sidebar-flower-drift-2 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translate(-160px, 320px) rotate(-720deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-flower {
+    animation: none !important;
+    display: none;
+  }
 }
 
 .sidebar-brand {

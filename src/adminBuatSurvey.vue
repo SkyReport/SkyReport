@@ -97,7 +97,7 @@
           </div>
         </div>
         <p class="field-helper">
-          Tidak wajib diisi jika kamu menyimpan survey ini sebagai draft.
+          Tidak wajib diisi jika Anda menyimpan survey ini sebagai draft.
         </p>
       </div>
 
@@ -145,7 +145,11 @@
                 <option value="Selesai">Selesai</option>
               </select>
             </div>
-            <p class="field-helper">Survey "Aktif" langsung tampil di halaman input bukti pegawai.</p>
+            <p class="field-helper">
+              Survey "Aktif" langsung tampil di halaman input bukti pegawai. Jika periode tanggal
+              diisi, status akan otomatis berubah ke "Aktif" saat tanggal mulai tiba dan ke "Selesai"
+              setelah tanggal selesai terlewati.
+            </p>
           </div>
         </div>
       </div>
@@ -281,14 +285,15 @@ async function handleSaveDraft() {
 
 .page-title {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
 .form-card {
@@ -345,8 +350,8 @@ async function handleSaveDraft() {
 
 .section-label {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
@@ -370,7 +375,8 @@ async function handleSaveDraft() {
 
 .field-label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--color-text-secondary);
 }
 

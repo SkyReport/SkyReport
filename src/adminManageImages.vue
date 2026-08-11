@@ -282,14 +282,15 @@ async function confirmDeleteAll() {
 
 .page-title {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: var(--color-text-muted);
+  line-height: 1.5;
   max-width: 760px;
 }
 

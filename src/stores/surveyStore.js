@@ -103,8 +103,20 @@ export const useSurveyStore = defineStore("survey", {
       };
     },
 
+    // Mirrors the DB-side check (RLS + enforce_submission_quota trigger):
+    // status must be "Aktif" AND today must fall within the survey's date
+    // period. Client-side filter for immediate display; the server side is
+    // the actual enforcement, this just keeps the UI consistent with it in
+    // the seconds between the period lapsing and the next sync_survey_statuses
+    // tick.
     activeAvailableSurveys() {
-      return this.surveys.filter((s) => s.status === "Aktif");
+      const today = new Date().toISOString().slice(0, 10);
+      return this.surveys.filter((s) => {
+        if (s.status !== "Aktif") return false;
+        if (s.tanggalMulai && s.tanggalMulai > today) return false;
+        if (s.tanggalSelesai && s.tanggalSelesai < today) return false;
+        return true;
+      });
     },
 
     submissionsBySurvey: (state) => (surveyId) =>
@@ -169,6 +181,16 @@ export const useSurveyStore = defineStore("survey", {
   actions: {
     // ── Fetches (populate the reactive cache from Supabase) ──────────────
     async fetchSurveys() {
+      // Opportunistic sync so status reflects the date period immediately
+      // on page load, without waiting for the next pg_cron tick. Swallow
+      // errors — this is a freshness nicety, not something that should
+      // block the survey list from loading.
+      try {
+        await supabase.rpc("sync_survey_statuses");
+      } catch (err) {
+        console.warn("sync_survey_statuses failed:", err);
+      }
+
       const { data, error } = await supabase.from("surveys").select("*").order("id");
       if (error) throw error;
       this.surveys = data.map(mapSurvey);
@@ -319,11 +341,11 @@ export const useSurveyStore = defineStore("survey", {
 
       const { error: updateError } = await supabase
         .from("submissions")
-        .update({ file_bukti: null })
+        .update({ file_bukti: "" })
         .eq("id", submissionId);
       if (updateError) throw new Error(updateError.message);
 
-      submission.fileBukti = null;
+      submission.fileBukti = "";
     },
 
     // Bulk version of deleteSubmissionImage, scoped to one survey — used by
@@ -342,12 +364,12 @@ export const useSurveyStore = defineStore("survey", {
       const ids = targets.map((s) => s.id);
       const { error: updateError } = await supabase
         .from("submissions")
-        .update({ file_bukti: null })
+        .update({ file_bukti: "" })
         .in("id", ids);
       if (updateError) throw new Error(updateError.message);
 
       targets.forEach((s) => {
-        s.fileBukti = null;
+        s.fileBukti = "";
       });
 
       return targets.length;

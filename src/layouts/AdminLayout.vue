@@ -74,19 +74,11 @@
           </div>
         </div>
 
-        <button class="icon-button" type="button" aria-label="Bantuan">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" />
-            <path
-              d="M7.8 7.8a2.2 2.2 0 1 1 3.4 1.8c-.7.5-1.2.9-1.2 1.9"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-            <circle cx="10" cy="14.3" r="0.9" fill="currentColor" />
-          </svg>
-        </button>
-        <div class="avatar">{{ avatarInitial }}</div>
+        <span class="header-divider" aria-hidden="true" />
+
+        <div class="avatar" :title="authStore.profile?.display_name || authStore.user?.email">
+          {{ avatarInitial }}
+        </div>
       </template>
     </AppHeader>
 
@@ -265,8 +257,8 @@ function formatNotifTime(isoString) {
 
 .notif-dot {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,9 +268,36 @@ function formatNotifTime(isoString) {
   border-radius: var(--radius-full);
   background-color: var(--color-danger);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   line-height: 1;
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 0 rgba(217, 45, 32, 0.5);
+  animation: notif-pulse 2.2s ease-out infinite;
+}
+
+@keyframes notif-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 45, 32, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(217, 45, 32, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 45, 32, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-dot {
+    animation: none;
+  }
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-border);
 }
 
 .notif-panel {
@@ -395,14 +414,22 @@ function formatNotifTime(isoString) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-full);
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-cyan-strong) 100%);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 93, 172, 0.35);
+  cursor: default;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(0, 93, 172, 0.45);
 }
 
 @media (max-width: 768px) {

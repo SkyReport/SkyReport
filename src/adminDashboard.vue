@@ -9,7 +9,7 @@
 
     <div class="chart-card">
       <div class="chart-card-header">
-        <h2 class="chart-title">Total Partisipasi</h2>
+        <h2 class="chart-title">Total Partisipasi per Divisi</h2>
         <div class="survey-filter">
           <svg class="survey-filter-icon" width="14" height="14" viewBox="0 0 20 20" fill="none">
             <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
@@ -230,14 +230,15 @@ function deptBarWidth(value) {
 
 .page-title {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: var(--color-text-muted);
+  line-height: 1.5;
   max-width: 720px;
 }
 

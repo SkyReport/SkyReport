@@ -98,14 +98,15 @@ const employeesInDept = computed(() =>
 
 .page-title {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: var(--color-text-muted);
+  line-height: 1.5;
   max-width: 720px;
   margin-top: 2px;
 }
@@ -131,13 +132,15 @@ const employeesInDept = computed(() =>
 
 .card-title {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
+  letter-spacing: -0.01em;
 }
 
 .card-subtitle {
   font-size: 13px;
   color: var(--color-text-muted);
+  line-height: 1.5;
   margin-top: 2px;
 }
 
