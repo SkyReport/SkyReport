@@ -126,7 +126,7 @@
                   @click="selectEmployee(employee)"
                 >
                   <span class="suggestion-name">{{ employee.nama }}</span>
-                  <span class="suggestion-unit">{{ employee.unitKerja }}</span>
+                  <span class="suggestion-unit">{{ shortDeptName(employee.unitKerja) }}</span>
                 </li>
               </ul>
               <p
@@ -201,6 +201,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
+import { shortDeptName } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
 import { useToastStore } from "./stores/toastStore";
 

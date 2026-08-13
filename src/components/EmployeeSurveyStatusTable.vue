@@ -47,7 +47,7 @@
             <tr v-for="(employee, index) in pagedEmployees" :key="employee.id">
               <td class="col-no">{{ pageStart + index + 1 }}</td>
               <td class="cell-name">{{ employee.nama }}</td>
-              <td class="cell-unit">{{ employee.unitKerja }}</td>
+              <td class="cell-unit">{{ shortDeptName(employee.unitKerja) }}</td>
               <td>
                 <span class="type-flag">
                   <span
@@ -191,6 +191,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { BUKTI_BUCKET, supabase } from "../lib/supabaseClient";
+import { shortDeptName } from "../orgStructure";
 import { jenisPegawaiLabel, useSurveyStore } from "../stores/surveyStore";
 
 const props = defineProps({
@@ -635,11 +636,9 @@ const pagedEmployees = computed(() => filteredEmployees.value.slice(pageStart.va
   overflow-y: auto;
   padding: 20px;
   border-radius: var(--radius-lg);
-  background-color: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 16px;

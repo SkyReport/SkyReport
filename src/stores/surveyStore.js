@@ -129,8 +129,8 @@ export const useSurveyStore = defineStore("survey", {
     participationGroupedBy(state) {
       return (getKey, submissionsList, allKeys, maxPengisian = 1) => {
         const list = submissionsList ?? state.submissions;
-        const totalOrganik = state.workforceTotals.Organik;
-        const totalNonOrganik = state.workforceTotals["Non-Organik"];
+        const totalOrganik = state.employees.filter((e) => e.jenisPegawai === "Organik").length;
+        const totalNonOrganik = state.employees.length - totalOrganik;
         const totalPegawai = totalOrganik + totalNonOrganik;
         const targetOrganik = totalOrganik * maxPengisian;
         const targetNonOrganik = totalNonOrganik * maxPengisian;
@@ -396,6 +396,20 @@ export const useSurveyStore = defineStore("survey", {
       this.notifications.forEach((n) => {
         n.read = true;
       });
+    },
+
+    async deleteNotification(notificationId) {
+      const { error } = await supabase.from("notifications").delete().eq("id", notificationId);
+      if (error) throw error;
+      this.notifications = this.notifications.filter((n) => n.id !== notificationId);
+    },
+
+    async clearAllNotifications() {
+      const ids = this.notifications.map((n) => n.id);
+      if (ids.length === 0) return;
+      const { error } = await supabase.from("notifications").delete().in("id", ids);
+      if (error) throw error;
+      this.notifications = [];
     },
 
     // ── Realtime subscriptions ────────────────────────────────────────────

@@ -16,7 +16,7 @@
             <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
           <select v-model="selectedSurveyId" class="survey-filter-select">
-            <option :value="null">Semua Survey</option>
+            <option v-if="!selectedSurveyId" :value="null" disabled>Pilih Survey</option>
             <option v-for="survey in store.surveys" :key="survey.id" :value="survey.id">
               {{ survey.nama }}
             </option>
@@ -24,56 +24,62 @@
         </div>
       </div>
 
-      <div class="stat-box">
-        <div class="stat-item">
-          <span class="stat-label">Total Target</span>
-          <span class="stat-value">{{ grandTotals.target.toLocaleString("id-ID") }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Total Voting</span>
-          <span class="stat-value">{{ grandTotals.voting.toLocaleString("id-ID") }}</span>
-        </div>
-      </div>
+      <p v-if="noSurveySelected" class="survey-required-warning">
+        ⚠️ Pilih survey terlebih dahulu untuk melihat data partisipasi.
+      </p>
 
-      <div class="legend">
-        <span class="legend-item">
-          <span class="legend-swatch legend-swatch-target" />
-          Target
-        </span>
-        <span class="legend-item">
-          <span class="legend-swatch legend-swatch-voting" />
-          Voting
-        </span>
-      </div>
-
-      <div class="chart-area">
-        <div class="chart-scroll">
-          <div class="chart-gridlines">
-            <div v-for="line in gridlines" :key="line" class="gridline" :style="{ bottom: line + '%' }" />
+      <template v-else>
+        <div class="stat-box">
+          <div class="stat-item">
+            <span class="stat-label">Total Target</span>
+            <span class="stat-value">{{ grandTotals.target.toLocaleString("id-ID") }}</span>
           </div>
-          <div class="chart-bars">
-            <div v-for="row in divisionRows" :key="row.key" class="bar-group">
-              <div class="bar-pair">
-                <div
-                  class="bar bar-target"
-                  :style="{ height: barHeight(row.target) + '%' }"
-                  :title="`Target ${row.shortLabel}: ${row.target.toLocaleString('id-ID')}`"
-                >
-                  <span class="bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
+          <div class="stat-item">
+            <span class="stat-label">Total Voting</span>
+            <span class="stat-value">{{ grandTotals.voting.toLocaleString("id-ID") }}</span>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-swatch legend-swatch-target" />
+            Target
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch legend-swatch-voting" />
+            Voting
+          </span>
+        </div>
+
+        <div class="chart-area">
+          <div class="chart-scroll">
+            <div class="chart-gridlines">
+              <div v-for="line in gridlines" :key="line" class="gridline" :style="{ bottom: line + '%' }" />
+            </div>
+            <div class="chart-bars">
+              <div v-for="row in divisionRows" :key="row.key" class="bar-group">
+                <div class="bar-pair">
+                  <div
+                    class="bar bar-target"
+                    :style="{ height: barHeight(row.target) + '%' }"
+                    :title="`Target ${row.shortLabel}: ${row.target.toLocaleString('id-ID')}`"
+                  >
+                    <span class="bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
+                  </div>
+                  <div
+                    class="bar bar-voting"
+                    :style="{ height: barHeight(row.voting) + '%' }"
+                    :title="`Voting ${row.shortLabel}: ${row.voting.toLocaleString('id-ID')}`"
+                  >
+                    <span class="bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
+                  </div>
                 </div>
-                <div
-                  class="bar bar-voting"
-                  :style="{ height: barHeight(row.voting) + '%' }"
-                  :title="`Voting ${row.shortLabel}: ${row.voting.toLocaleString('id-ID')}`"
-                >
-                  <span class="bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
-                </div>
+                <span class="bar-label">{{ row.shortLabel }}</span>
               </div>
-              <span class="bar-label">{{ row.shortLabel }}</span>
             </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <div class="chart-card">
@@ -81,51 +87,57 @@
         <h2 class="chart-title">Total Partisipasi per Departemen</h2>
       </div>
 
-      <div class="legend">
-        <span class="legend-item">
-          <span class="legend-swatch legend-swatch-target" />
-          Target
-        </span>
-        <span class="legend-item">
-          <span class="legend-swatch legend-swatch-voting" />
-          Voting
-        </span>
-      </div>
+      <p v-if="noSurveySelected" class="survey-required-warning">
+        ⚠️ Pilih survey terlebih dahulu untuk melihat data partisipasi.
+      </p>
 
-      <div class="dept-list">
-        <div v-for="row in departmentRows" :key="row.key" class="dept-row">
-          <span class="dept-row-label" :title="row.shortLabel">{{ row.shortLabel }}</span>
-          <div class="dept-row-bars">
-            <div class="dept-bar-row">
-              <div class="dept-bar-track">
-                <div
-                  class="dept-bar dept-bar-target"
-                  :style="{ width: deptBarWidth(row.target) + '%' }"
-                  :title="`Target: ${row.target.toLocaleString('id-ID')}`"
-                />
+      <template v-else>
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-swatch legend-swatch-target" />
+            Target
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch legend-swatch-voting" />
+            Voting
+          </span>
+        </div>
+
+        <div class="dept-list">
+          <div v-for="row in departmentRows" :key="row.key" class="dept-row">
+            <span class="dept-row-label" :title="row.shortLabel">{{ row.shortLabel }}</span>
+            <div class="dept-row-bars">
+              <div class="dept-bar-row">
+                <div class="dept-bar-track">
+                  <div
+                    class="dept-bar dept-bar-target"
+                    :style="{ width: deptBarWidth(row.target) + '%' }"
+                    :title="`Target: ${row.target.toLocaleString('id-ID')}`"
+                  />
+                </div>
+                <span class="dept-bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
               </div>
-              <span class="dept-bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
-            </div>
-            <div class="dept-bar-row">
-              <div class="dept-bar-track">
-                <div
-                  class="dept-bar dept-bar-voting"
-                  :style="{ width: deptBarWidth(row.voting) + '%' }"
-                  :title="`Voting: ${row.voting.toLocaleString('id-ID')}`"
-                />
+              <div class="dept-bar-row">
+                <div class="dept-bar-track">
+                  <div
+                    class="dept-bar dept-bar-voting"
+                    :style="{ width: deptBarWidth(row.voting) + '%' }"
+                    :title="`Voting: ${row.voting.toLocaleString('id-ID')}`"
+                  />
+                </div>
+                <span class="dept-bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
               </div>
-              <span class="dept-bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
             </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS } from "./orgStructure";
+import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS, shortDeptName } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
 
 const store = useSurveyStore();
@@ -143,6 +155,8 @@ onMounted(async () => {
 
 const selectedSurveyId = ref(null);
 
+const noSurveySelected = computed(() => !selectedSurveyId.value);
+
 const selectedSurvey = computed(() =>
   selectedSurveyId.value ? store.findSurvey(selectedSurveyId.value) : null
 );
@@ -151,7 +165,7 @@ const maxPengisian = computed(() => selectedSurvey.value?.maxPengisian ?? 1);
 
 const filteredSubmissions = computed(() => {
   const survey = selectedSurvey.value;
-  if (!survey) return store.submissions;
+  if (!survey) return [];
   return store.submissions.filter((s) => s.surveyId === survey.id);
 });
 
@@ -191,10 +205,6 @@ function barHeight(value) {
 }
 
 const gridlines = [0, 25, 50, 75, 100];
-
-function shortDeptName(name) {
-  return name.replace(" Department Head", "");
-}
 
 const departmentRows = computed(() =>
   ORG_PARENT_KEYS.flatMap((parentKey) => ORG_CHILDREN_BY_PARENT.get(parentKey) ?? []).map((dept) => {
@@ -314,6 +324,15 @@ function deptBarWidth(value) {
   color: var(--color-text-secondary);
   background: transparent;
   cursor: pointer;
+}
+
+.survey-required-warning {
+  padding: 32px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-md);
 }
 
 .stat-box {

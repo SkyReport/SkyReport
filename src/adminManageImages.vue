@@ -63,7 +63,7 @@
                 <td class="col-no">{{ pageStart + index + 1 }}</td>
                 <td class="cell-name">{{ sub.nama }}</td>
                 <td class="cell-muted">{{ surveyNameFor(sub) }}</td>
-                <td class="cell-muted">{{ sub.departemen }}</td>
+                <td class="cell-muted">{{ shortDeptName(sub.departemen) }}</td>
                 <td>{{ sub.tanggal }}</td>
                 <td class="cell-muted">{{ submissionTime(sub) || "-" }}</td>
                 <td class="col-action">
@@ -136,6 +136,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { BUKTI_BUCKET, supabase } from "./lib/supabaseClient";
+import { shortDeptName } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
 import { useToastStore } from "./stores/toastStore";
 

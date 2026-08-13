@@ -8,7 +8,7 @@
           kepuasan di seluruh departemen InJourney Airports.
         </p>
       </div>
-      <button type="button" class="btn-export" @click="exportToPdf">
+      <button type="button" class="btn-export" :disabled="noSurveySelected" @click="exportToPdf">
         <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
           <path d="M10 3v9m0 0 3.5-3.5M10 12l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M4 14v2a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 16 16v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -33,7 +33,7 @@
                   <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
                 <select v-model="selectedSurveyFilterId" class="survey-filter-select">
-                  <option :value="null">Semua Survey</option>
+                  <option v-if="!selectedSurveyFilterId" :value="null" disabled>Pilih Survey</option>
                   <option v-for="survey in store.surveys" :key="survey.id" :value="survey.id">
                     {{ survey.nama }}
                   </option>
@@ -93,7 +93,12 @@
                     <td><span class="percent-bold">{{ row.persenTotal }}%</span></td>
                   </tr>
                 </template>
-                <tr v-if="dateTable.rows.value.length === 0">
+                <tr v-if="noSurveySelected">
+                  <td colspan="15" class="empty-row empty-row-warning">
+                    ⚠️ Pilih survey terlebih dahulu untuk melihat data partisipasi.
+                  </td>
+                </tr>
+                <tr v-else-if="dateTable.rows.value.length === 0">
                   <td colspan="15" class="empty-row">Belum ada data partisipasi survei.</td>
                 </tr>
                 <tr v-if="dateTable.rows.value.length > 0" class="total-row">
@@ -305,7 +310,12 @@
                     </td>
                   </tr>
                 </template>
-                <tr v-if="deptTable.rows.value.length === 0">
+                <tr v-if="noSurveySelected">
+                  <td colspan="15" class="empty-row empty-row-warning">
+                    ⚠️ Pilih survey terlebih dahulu untuk melihat data partisipasi.
+                  </td>
+                </tr>
+                <tr v-else-if="deptTable.rows.value.length === 0">
                   <td colspan="15" class="empty-row">Belum ada data partisipasi survei.</td>
                 </tr>
                 <tr v-if="deptTable.rows.value.length > 0" class="total-row">
@@ -365,7 +375,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS } from "./orgStructure";
+import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS, shortDeptName } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
 
 const store = useSurveyStore();
@@ -379,13 +389,6 @@ function toggleDivisi(deptKey) {
   expandedDept.value = expandedDept.value === deptKey ? null : deptKey;
 }
 
-// Display-only: drop the redundant " Department Head" suffix in the expand
-// table. "Airport Operation Center Head" has no such suffix so it's left
-// untouched. The underlying department name (used for links/data lookups)
-// stays the full original string.
-function shortDeptName(name) {
-  return name.replace(" Department Head", "");
-}
 
 function departmentDetailLink(deptName) {
   return {
@@ -396,10 +399,9 @@ function departmentDetailLink(deptName) {
 }
 
 // Jumlah/Target/Gap per departemen dihitung dari data pegawai ASLI
-// (store.employees, hasil migrasi 005) — bukan dari konstanta
-// workforceTotals (150/50) yang cuma representasi total perusahaan
-// secara keseluruhan dan tidak selalu match dengan jumlah pegawai
-// yang benar-benar terdaftar per departemen.
+// (store.employees, hasil migrasi 005), sama seperti dateTable (lihat
+// participationGroupedBy di surveyStore.js) — supaya total pegawai di
+// tabel "per Tanggal" dan "per Departemen" selalu konsisten.
 function buildDeptRow(key, deptNames) {
   const maxPengisian = selectedSurveyFilter.value?.maxPengisian ?? 1;
   const deptSet = new Set(deptNames);
@@ -505,9 +507,11 @@ const selectedSurveyFilterRange = computed(() => {
   return `${formatDate(survey.tanggalMulai)} - ${formatDate(survey.tanggalSelesai)}`;
 });
 
+const noSurveySelected = computed(() => !selectedSurveyFilterId.value);
+
 const filteredSubmissions = computed(() => {
   const survey = selectedSurveyFilter.value;
-  if (!survey) return store.submissions;
+  if (!survey) return [];
   return store.submissions.filter((s) => s.surveyId === survey.id);
 });
 
@@ -576,7 +580,9 @@ const dateTable = useParticipationTable((s) => s.tanggal, {
   sort: (a, b) => (a.key < b.key ? 1 : -1),
 });
 const deptRows = computed(() =>
-  ORG_PARENT_KEYS.map((key) => buildDeptRow(key, ORG_CHILDREN_BY_PARENT.get(key) ?? []))
+  noSurveySelected.value
+    ? []
+    : ORG_PARENT_KEYS.map((key) => buildDeptRow(key, ORG_CHILDREN_BY_PARENT.get(key) ?? []))
 );
 const deptTable = useRowsTable(deptRows, { pageSize: 10 });
 
@@ -663,8 +669,9 @@ function drawSectionDividers(data) {
 }
 
 function exportToPdf() {
+  if (noSurveySelected.value) return;
   const doc = new jsPDF({ orientation: "landscape" });
-  const surveyLabel = selectedSurveyFilter.value ? selectedSurveyFilter.value.nama : "Semua Survey";
+  const surveyLabel = selectedSurveyFilter.value.nama;
 
   doc.setFontSize(14);
   doc.text("Laporan Hasil Survei - SkyVote", 14, 15);
@@ -1134,6 +1141,12 @@ function exportToPdf() {
   color: var(--color-text-muted);
 }
 
+.empty-row-warning {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  font-weight: 600;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -1184,7 +1197,8 @@ function exportToPdf() {
 }
 
 .btn-secondary:disabled,
-.btn-primary:disabled {
+.btn-primary:disabled,
+.btn-export:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

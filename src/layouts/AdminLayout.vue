@@ -57,14 +57,16 @@
           <div v-if="notifOpen" class="notif-panel" @click.stop>
             <div class="notif-panel-header">
               <span class="notif-panel-title">Notifikasi</span>
-              <button
-                v-if="store.unreadNotificationCount > 0"
-                type="button"
-                class="notif-mark-all"
-                @click="store.markAllNotificationsRead()"
-              >
-                Tandai semua dibaca
-              </button>
+              <div class="notif-panel-actions">
+                <button
+                  v-if="store.sortedNotifications.length > 0"
+                  type="button"
+                  class="notif-clear-all"
+                  @click="store.clearAllNotifications()"
+                >
+                  Hapus semua
+                </button>
+              </div>
             </div>
             <ul class="notif-list">
               <li
@@ -79,6 +81,16 @@
                   <span class="notif-item-message">{{ notif.message }}</span>
                   <span class="notif-item-time">{{ formatNotifTime(notif.createdAt) }}</span>
                 </div>
+                <button
+                  type="button"
+                  class="notif-item-delete"
+                  aria-label="Hapus notifikasi"
+                  @click.stop="store.deleteNotification(notif.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                    <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </button>
               </li>
               <li v-if="store.sortedNotifications.length === 0" class="notif-empty">
                 Belum ada notifikasi.
@@ -144,9 +156,12 @@ function closeNotifOnOutsideClick(event) {
   }
 }
 
-function toggleNotifPanel() {
+async function toggleNotifPanel() {
   notifOpen.value = !notifOpen.value;
-  if (notifOpen.value) store.fetchNotifications();
+  if (notifOpen.value) {
+    await store.fetchNotifications();
+    store.markAllNotificationsRead();
+  }
 }
 
 onMounted(() => {
@@ -372,14 +387,23 @@ function formatNotifTime(isoString) {
   color: var(--color-text);
 }
 
-.notif-mark-all {
+.notif-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notif-clear-all {
   border: none;
   background: transparent;
-  color: var(--color-primary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
+}
+
+.notif-clear-all {
+  color: var(--color-danger);
 }
 
 .notif-list {
@@ -440,6 +464,32 @@ function formatNotifTime(isoString) {
 .notif-item-time {
   font-size: 11px;
   color: var(--color-text-muted);
+}
+
+.notif-item-delete {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.notif-item:hover .notif-item-delete {
+  opacity: 1;
+}
+
+.notif-item-delete:hover {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 .notif-empty {
