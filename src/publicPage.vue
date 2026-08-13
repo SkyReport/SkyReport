@@ -32,6 +32,7 @@
 
     <main class="main-content">
       <div class="card">
+        <div class="card-accent" aria-hidden="true" />
         <div class="decorative-blur-blob" />
 
         <div class="card-heading">
@@ -42,11 +43,17 @@
         <form class="form" @submit.prevent="handleSubmit">
           <div class="field">
             <label class="field-label" for="survey">Pilih survey</label>
-            <select id="survey" v-model="selectedSurveyId" class="select">
-              <option v-for="survey in surveys" :key="survey.id" :value="survey.id">
-                {{ survey.nama }}
-              </option>
-            </select>
+            <div class="input-wrap">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <select id="survey" v-model="selectedSurveyId" class="select">
+                <option v-for="survey in surveys" :key="survey.id" :value="survey.id">
+                  {{ survey.nama }}
+                </option>
+              </select>
+            </div>
 
             <div v-if="selectedSurvey" class="survey-meta">
               <a
@@ -72,32 +79,45 @@
           </div>
 
           <div class="field">
-            <label class="field-label" for="tanggal">Pilih tgl</label>
-            <input
-              id="tanggal"
-              v-model="form.tanggal"
-              type="date"
-              class="input"
-              :min="minDate"
-              :max="maxDate"
-              required
-            />
+            <label class="field-label" for="tanggal">Pilih tanggal</label>
+            <div class="input-wrap" @click="openDatePicker">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <input
+                id="tanggal"
+                ref="tanggalInput"
+                v-model="form.tanggal"
+                type="date"
+                class="input"
+                :min="minDate"
+                :max="maxDate"
+                required
+              />
+            </div>
           </div>
 
           <div class="field" :class="{ 'field-elevated': showSuggestions }">
             <label class="field-label" for="nama">Pilih nama</label>
             <div ref="autocompleteRef" class="autocomplete">
-              <input
-                id="nama"
-                v-model="nameQuery"
-                type="text"
-                class="input"
-                placeholder="Cari nama pegawai..."
-                autocomplete="off"
-                required
-                @focus="showSuggestions = true"
-                @input="handleNameInput"
-              />
+              <div class="input-wrap">
+                <svg class="input-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="7" r="3.2" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+                <input
+                  id="nama"
+                  v-model="nameQuery"
+                  type="text"
+                  class="input"
+                  placeholder="Cari nama pegawai..."
+                  autocomplete="off"
+                  required
+                  @focus="showSuggestions = true"
+                  @input="handleNameInput"
+                />
+              </div>
               <ul v-if="showSuggestions && suggestions.length" class="suggestion-list">
                 <li
                   v-for="employee in suggestions"
@@ -147,7 +167,7 @@
                 <p class="dropzone-text">
                   <span class="dropzone-link">Klik untuk upload</span> atau drag and drop
                 </p>
-                <p class="dropzone-hint">PNG, JPG, atau GIF (Maks. 10MB)</p>
+                <p class="dropzone-hint">PNG, JPG, atau GIF (Maks. 5MB)</p>
               </template>
             </div>
             <p v-if="quotaFull" class="field-error">
@@ -165,7 +185,11 @@
           </div>
 
           <button type="submit" class="submit-button" :disabled="!canSubmit || submitting">
+            <span v-if="submitting" class="spinner" aria-hidden="true" />
             {{ submitting ? "Mengunggah..." : "Upload Bukti" }}
+            <svg v-if="!submitting" class="submit-arrow" width="15" height="15" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </button>
         </form>
       </div>
@@ -187,6 +211,7 @@ const surveys = computed(() => store.activeAvailableSurveys);
 
 const selectedSurveyId = ref(null);
 const fileInput = ref(null);
+const tanggalInput = ref(null);
 const isDragging = ref(false);
 const submitting = ref(false);
 
@@ -257,14 +282,11 @@ onBeforeUnmount(() => {
 
 const selectedSurvey = computed(() => store.findSurvey(selectedSurveyId.value));
 
-// Date picker is clamped to the selected survey's own period — can't log
-// evidence for a date before it started or after it ended, and never for a
-// date in the future.
+// Date picker is clamped to the selected survey's own open period — any date
+// from tanggalMulai to tanggalSelesai is fillable, including future dates
+// within that window.
 const minDate = computed(() => selectedSurvey.value?.tanggalMulai || undefined);
-const maxDate = computed(() => {
-  const surveyEnd = selectedSurvey.value?.tanggalSelesai;
-  return surveyEnd && surveyEnd < today ? surveyEnd : today;
-});
+const maxDate = computed(() => selectedSurvey.value?.tanggalSelesai || undefined);
 
 const employeeSubmissionCount = computed(() =>
   selectedSurveyId.value && selectedEmployee.value
@@ -297,17 +319,25 @@ watch(selectedSurveyId, () => {
   if (maxDate.value && form.tanggal > maxDate.value) form.tanggal = maxDate.value;
 });
 
+function openDatePicker() {
+  try {
+    tanggalInput.value?.showPicker();
+  } catch {
+    tanggalInput.value?.focus();
+  }
+}
+
 function triggerFilePicker() {
   fileInput.value?.click();
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB — cukup untuk screenshot HP resolusi tinggi
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 function setFileIfValid(file) {
   if (!file) return;
   if (file.size > MAX_FILE_SIZE) {
     toast.show(
-      `Ukuran file terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal 10MB.`,
+      `Ukuran file terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal 5MB.`,
       "error"
     );
     return;
@@ -357,16 +387,18 @@ async function handleSubmit() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background-color: var(--color-bg);
 }
 
 .main-content {
   flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
+  padding: 16px 24px;
+  overflow-y: auto;
 }
 
 /* ── Drifting spinning-flower silhouettes ────────────────────────────────
@@ -422,25 +454,40 @@ async function handleSubmit() {
 .card {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
+  max-height: 100%;
   overflow: hidden;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background-color: var(--glass-bg);
+  padding: 22px 24px 20px;
+  border-radius: 20px;
+  background-color: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.22), var(--glass-shadow);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   animation: card-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 93, 172, 0.08);
+  box-shadow: 0 28px 64px -10px rgba(15, 23, 42, 0.26), 0 0 0 1px rgba(0, 93, 172, 0.08);
   transform: translateY(-2px);
+}
+
+.card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 45%,
+    var(--color-accent-cyan-strong) 100%
+  );
 }
 
 .card-heading,
@@ -518,28 +565,28 @@ async function handleSubmit() {
 
 .card-title {
   color: var(--color-text);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .card-subtitle {
   color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   position: relative;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .field-elevated {
@@ -554,23 +601,54 @@ async function handleSubmit() {
   letter-spacing: 0.01em;
 }
 
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 13px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.input-wrap:has(.select:focus, .input:focus) .input-icon {
+  color: var(--color-primary);
+}
+
 .select,
 .input {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  height: 38px;
+  padding: 0 12px 0 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
   font-family: var(--font-sans);
   font-size: 14px;
   color: var(--color-text);
-  background-color: var(--color-surface);
+  background-color: var(--color-bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%23334155' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 34px;
+  cursor: pointer;
 }
 
 .select:focus,
 .input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 93, 172, 0.12);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(0, 93, 172, 0.14);
 }
 
 .autocomplete {
@@ -641,15 +719,15 @@ async function handleSubmit() {
 .survey-meta {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .name-quota-info {
-  margin-top: 6px;
-  padding: 8px 12px;
+  margin-top: 4px;
+  padding: 6px 10px;
   border-radius: var(--radius-md);
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .name-quota-info.quota-ok {
@@ -671,7 +749,7 @@ async function handleSubmit() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius-md);
   background-color: var(--color-primary);
   color: #ffffff;
@@ -703,8 +781,8 @@ async function handleSubmit() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 24px 16px;
+  gap: 3px;
+  padding: 14px 16px;
   border: 1.5px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -773,33 +851,61 @@ async function handleSubmit() {
 
 .submit-button {
   width: 100%;
-  padding: 12px 0;
+  height: 40px;
+  padding: 0;
   border: none;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.14px;
-  box-shadow: var(--shadow-sm);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(0, 93, 172, 0.28);
   cursor: pointer;
-  transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, filter 0.15s ease;
+}
+
+.submit-arrow {
+  transition: transform 0.2s ease;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  box-shadow: 0 4px 14px rgba(0, 93, 172, 0.35);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(0, 93, 172, 0.38);
   transform: translateY(-1px);
+}
+
+.submit-button:hover:not(:disabled) .submit-arrow {
+  transform: translateX(3px);
 }
 
 .submit-button:active:not(:disabled) {
   transform: scale(0.97);
-  box-shadow: var(--shadow-sm);
 }
 
 .submit-button:disabled {
-  background-color: var(--color-border-strong);
+  background: var(--color-border-strong);
+  box-shadow: none;
   cursor: not-allowed;
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

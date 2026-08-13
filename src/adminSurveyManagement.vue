@@ -610,6 +610,12 @@ async function confirmDelete(survey) {
   opacity: 1;
 }
 
+@media (hover: none) {
+  .row-actions {
+    opacity: 1;
+  }
+}
+
 .icon-btn {
   display: flex;
   align-items: center;
@@ -691,5 +697,24 @@ async function confirmDelete(survey) {
 .pager-page.active {
   background-color: var(--color-primary);
   color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .page-heading {
+    flex-wrap: wrap;
+  }
+
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toolbar {
+    padding: 16px;
+  }
+
+  .search-box {
+    max-width: none;
+  }
 }
 </style>

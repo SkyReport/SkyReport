@@ -47,28 +47,30 @@
       </div>
 
       <div class="chart-area">
-        <div class="chart-gridlines">
-          <div v-for="line in gridlines" :key="line" class="gridline" :style="{ bottom: line + '%' }" />
-        </div>
-        <div class="chart-bars">
-          <div v-for="row in divisionRows" :key="row.key" class="bar-group">
-            <div class="bar-pair">
-              <div
-                class="bar bar-target"
-                :style="{ height: barHeight(row.target) + '%' }"
-                :title="`Target ${row.shortLabel}: ${row.target.toLocaleString('id-ID')}`"
-              >
-                <span class="bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
+        <div class="chart-scroll">
+          <div class="chart-gridlines">
+            <div v-for="line in gridlines" :key="line" class="gridline" :style="{ bottom: line + '%' }" />
+          </div>
+          <div class="chart-bars">
+            <div v-for="row in divisionRows" :key="row.key" class="bar-group">
+              <div class="bar-pair">
+                <div
+                  class="bar bar-target"
+                  :style="{ height: barHeight(row.target) + '%' }"
+                  :title="`Target ${row.shortLabel}: ${row.target.toLocaleString('id-ID')}`"
+                >
+                  <span class="bar-value">{{ row.target.toLocaleString("id-ID") }}</span>
+                </div>
+                <div
+                  class="bar bar-voting"
+                  :style="{ height: barHeight(row.voting) + '%' }"
+                  :title="`Voting ${row.shortLabel}: ${row.voting.toLocaleString('id-ID')}`"
+                >
+                  <span class="bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
+                </div>
               </div>
-              <div
-                class="bar bar-voting"
-                :style="{ height: barHeight(row.voting) + '%' }"
-                :title="`Voting ${row.shortLabel}: ${row.voting.toLocaleString('id-ID')}`"
-              >
-                <span class="bar-value">{{ row.voting.toLocaleString("id-ID") }}</span>
-              </div>
+              <span class="bar-label">{{ row.shortLabel }}</span>
             </div>
-            <span class="bar-label">{{ row.shortLabel }}</span>
           </div>
         </div>
       </div>
@@ -376,6 +378,10 @@ function deptBarWidth(value) {
   padding-top: 8px;
 }
 
+.chart-scroll {
+  height: 100%;
+}
+
 .chart-gridlines {
   position: absolute;
   inset: 8px 0 32px 0;
@@ -550,6 +556,28 @@ function deptBarWidth(value) {
 
   .bar {
     width: 20px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .chart-area {
+    height: 220px;
+  }
+
+  .chart-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .chart-bars {
+    min-width: 480px;
+  }
+
+  .stat-box {
+    width: 100%;
+    gap: 20px;
   }
 }
 </style>

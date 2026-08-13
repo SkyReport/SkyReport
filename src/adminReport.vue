@@ -155,7 +155,7 @@
             </div>
           </div>
 
-          <div class="table-scroll table-scroll-x">
+          <div class="table-scroll">
             <table class="report-table dept-table">
               <colgroup>
                 <col style="width: 32px" />
@@ -872,17 +872,14 @@ function exportToPdf() {
 }
 
 .table-scroll {
-  overflow-x: visible;
+  overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
-.table-scroll-x {
-  overflow-x: auto;
-}
-
 .report-table {
   width: 100%;
+  min-width: 1100px;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 12px;
@@ -1192,4 +1189,22 @@ function exportToPdf() {
   cursor: not-allowed;
 }
 
+@media (max-width: 640px) {
+  .page-heading {
+    flex-wrap: wrap;
+  }
+
+  .btn-export {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .report-card {
+    padding: 16px;
+  }
+
+  .survey-filter-select {
+    min-width: 0;
+  }
+}
 </style>

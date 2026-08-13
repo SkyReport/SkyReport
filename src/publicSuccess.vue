@@ -4,6 +4,7 @@
 
     <main class="main-content">
       <div class="card">
+        <div class="card-accent" aria-hidden="true" />
         <div class="icon-badge-wrap">
           <span class="icon-ring" />
           <div class="icon-badge">
@@ -46,7 +47,12 @@
           </div>
         </div>
 
-        <RouterLink to="/" class="button anim-in anim-delay-3">Kembali</RouterLink>
+        <RouterLink to="/" class="button anim-in anim-delay-3">
+          <svg class="button-arrow" width="15" height="15" viewBox="0 0 20 20" fill="none">
+            <path d="M16 10H4M9 5l-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Kembali
+        </RouterLink>
       </div>
     </main>
   </div>
@@ -93,20 +99,36 @@ const submissionTime = computed(() => {
 }
 
 .card {
+  position: relative;
   width: 100%;
   max-width: 480px;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background-color: var(--glass-bg);
+  overflow: hidden;
+  padding: 32px 28px 28px;
+  border-radius: 22px;
+  background-color: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.22), var(--glass-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 24px;
   animation: card-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 45%,
+    var(--color-accent-cyan-strong) 100%
+  );
 }
 
 .icon-badge-wrap {
@@ -275,19 +297,39 @@ const submissionTime = computed(() => {
 
 .button {
   width: 100%;
-  padding: 12px 0;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary);
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: #ffffff;
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
   text-decoration: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 14px rgba(0, 93, 172, 0.28);
+  transition: box-shadow 0.2s ease, transform 0.15s ease, filter 0.15s ease;
+}
+
+.button-arrow {
+  transition: transform 0.2s ease;
 }
 
 .button:hover {
-  background-color: var(--color-primary-dark);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(0, 93, 172, 0.38);
+  transform: translateY(-1px);
+}
+
+.button:hover .button-arrow {
+  transform: translateX(-3px);
+}
+
+.button:active {
+  transform: scale(0.97);
 }
 </style>

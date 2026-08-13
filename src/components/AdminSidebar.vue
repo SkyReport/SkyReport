@@ -1,5 +1,7 @@
 <template>
-  <aside class="sidebar">
+  <div v-if="open" class="sidebar-backdrop" @click="$emit('close')" />
+
+  <aside class="sidebar" :class="{ 'sidebar-open': open }">
     <svg class="sidebar-flower sidebar-flower-1" viewBox="0 0 24 24" aria-hidden="true">
       <g>
         <ellipse cx="12" cy="6" rx="3" ry="5" />
@@ -42,7 +44,7 @@
     </div>
 
     <nav class="sidebar-nav">
-      <RouterLink to="/admin/dashboard" class="nav-item" active-class="active">
+      <RouterLink to="/admin/dashboard" class="nav-item" active-class="active" @click="$emit('close')">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <rect x="2.5" y="10.5" width="3.5" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
@@ -53,7 +55,7 @@
         Dashboard Admin
       </RouterLink>
 
-      <RouterLink to="/admin/management" class="nav-item" active-class="active">
+      <RouterLink to="/admin/management" class="nav-item" active-class="active" @click="$emit('close')">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <path
@@ -67,7 +69,7 @@
         Manage Survey
       </RouterLink>
 
-      <RouterLink to="/admin/report" class="nav-item" active-class="active">
+      <RouterLink to="/admin/report" class="nav-item" active-class="active" @click="$emit('close')">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.6" />
@@ -77,7 +79,7 @@
         Reports
       </RouterLink>
 
-      <RouterLink to="/admin/hapus-gambar" class="nav-item" active-class="active">
+      <RouterLink to="/admin/hapus-gambar" class="nav-item" active-class="active" @click="$emit('close')">
         <span class="nav-icon-box">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
             <path
@@ -128,6 +130,11 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/authStore";
 import ConfirmDialog from "./ConfirmDialog.vue";
+
+defineProps({
+  open: { type: Boolean, default: false },
+});
+defineEmits(["close"]);
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -304,9 +311,48 @@ async function handleLogout() {
   border-top: 1px solid var(--color-sidebar-border);
 }
 
+.sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    z-index: 19;
+    animation: backdrop-fade 0.2s ease both;
+  }
+
+  @keyframes backdrop-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .sidebar {
-    display: none;
+    transform: translateX(-100%);
+    box-shadow: none;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 24px rgba(15, 23, 42, 0.25);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar {
+      transition: none;
+    }
+
+    .sidebar-backdrop {
+      animation: none;
+    }
   }
 }
 </style>

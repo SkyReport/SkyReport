@@ -1,14 +1,22 @@
 <template>
   <div class="buat-survey-page">
     <div class="page-heading">
-      <h1 class="page-title">{{ isEditing ? "Edit Survey" : "Buat Survey Baru" }}</h1>
-      <p class="page-subtitle">
-        {{
-          isEditing
-            ? "Perbarui detail survey ini."
-            : "Isi detail survey untuk ditambahkan ke daftar survey."
-        }}
-      </p>
+      <div>
+        <RouterLink to="/admin/management" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+            <path d="M12 4 6 10l6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Kembali
+        </RouterLink>
+        <h1 class="page-title">{{ isEditing ? "Edit Survey" : "Buat Survey Baru" }}</h1>
+        <p class="page-subtitle">
+          {{
+            isEditing
+              ? "Perbarui detail survey ini."
+              : "Isi detail survey untuk ditambahkan ke daftar survey."
+          }}
+        </p>
+      </div>
     </div>
 
     <form class="form-card" @submit.prevent="handleSubmit">
@@ -64,13 +72,14 @@
         <div class="field-row">
           <div class="field">
             <label class="field-label" for="tanggal-mulai">Tanggal Mulai</label>
-            <div class="input-wrap">
+            <div class="input-wrap" @click="openDatePicker(tanggalMulaiInput)">
               <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="none">
                 <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
                 <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
               <input
                 id="tanggal-mulai"
+                ref="tanggalMulaiInput"
                 v-model="form.tanggalMulai"
                 class="input"
                 type="date"
@@ -80,13 +89,14 @@
           </div>
           <div class="field">
             <label class="field-label" for="tanggal-selesai">Tanggal Selesai</label>
-            <div class="input-wrap">
+            <div class="input-wrap" @click="openDatePicker(tanggalSelesaiInput)">
               <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="none">
                 <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
                 <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
               <input
                 id="tanggal-selesai"
+                ref="tanggalSelesaiInput"
                 v-model="form.tanggalSelesai"
                 class="input"
                 type="date"
@@ -168,7 +178,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useSurveyStore } from "./stores/surveyStore";
 import { useToastStore } from "./stores/toastStore";
@@ -180,6 +190,17 @@ const route = useRoute();
 
 const editingId = computed(() => (route.params.id ? Number(route.params.id) : null));
 const isEditing = computed(() => editingId.value !== null);
+
+const tanggalMulaiInput = ref(null);
+const tanggalSelesaiInput = ref(null);
+
+function openDatePicker(inputRef) {
+  try {
+    inputRef.value?.showPicker();
+  } catch {
+    inputRef.value?.focus();
+  }
+}
 
 const form = reactive({
   nama: "",
@@ -281,6 +302,21 @@ async function handleSaveDraft() {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--color-primary);
 }
 
 .page-title {
@@ -499,5 +535,25 @@ async function handleSaveDraft() {
 
 .btn-secondary:hover {
   background-color: var(--color-bg);
+}
+
+@media (max-width: 640px) {
+  .form-card {
+    padding: 18px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-footer {
+    justify-content: stretch;
+  }
+
+  .form-footer > * {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
 }
 </style>

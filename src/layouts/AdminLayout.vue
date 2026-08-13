@@ -7,6 +7,19 @@
 
     <AppHeader class="admin-header">
       <template #brand>
+        <button
+          class="menu-toggle"
+          type="button"
+          :aria-label="mobileNavOpen ? 'Tutup menu' : 'Buka menu'"
+          @click="mobileNavOpen = !mobileNavOpen"
+        >
+          <svg v-if="!mobileNavOpen" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          </svg>
+          <svg v-else width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          </svg>
+        </button>
         <div class="page-context">
           <span class="page-context-label">Admin</span>
           <span class="page-context-divider">/</span>
@@ -83,7 +96,7 @@
     </AppHeader>
 
     <div class="admin-body">
-      <AdminSidebar />
+      <AdminSidebar :open="mobileNavOpen" @close="mobileNavOpen = false" />
       <main class="admin-content">
         <div class="admin-content-inner">
           <RouterView />
@@ -94,7 +107,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import AdminSidebar from "../components/AdminSidebar.vue";
 import AppHeader from "../components/AppHeader.vue";
@@ -104,6 +117,11 @@ import { useSurveyStore } from "../stores/surveyStore";
 const route = useRoute();
 const store = useSurveyStore();
 const authStore = useAuthStore();
+
+const mobileNavOpen = ref(false);
+watch(() => route.fullPath, () => {
+  mobileNavOpen.value = false;
+});
 
 const pageTitle = computed(() => {
   if (route.name === "admin-buat-survey") {
@@ -193,10 +211,30 @@ function formatNotifTime(isoString) {
   opacity: 0.7;
 }
 
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.menu-toggle:hover {
+  background-color: var(--color-bg);
+}
+
 .page-context {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .page-context-label {
@@ -305,6 +343,7 @@ function formatNotifTime(isoString) {
   top: calc(100% + 8px);
   right: 0;
   width: 340px;
+  max-width: calc(100vw - 32px);
   max-height: 400px;
   display: flex;
   flex-direction: column;
@@ -435,6 +474,34 @@ function formatNotifTime(isoString) {
 @media (max-width: 768px) {
   .admin-content {
     margin-left: 0;
+    padding: 20px 16px;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .page-context-label {
+    display: none;
+  }
+
+  .page-context-divider {
+    display: none;
+  }
+
+  .notif-panel {
+    position: fixed;
+    top: 68px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-divider {
+    display: none;
   }
 }
 </style>

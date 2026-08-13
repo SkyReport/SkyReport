@@ -591,4 +591,20 @@ async function confirmDeleteAll() {
   background-color: var(--color-primary);
   color: #ffffff;
 }
+
+@media (max-width: 640px) {
+  .board-card {
+    padding: 16px;
+  }
+
+  .search-box {
+    max-width: none;
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  .delete-all-button {
+    width: 100%;
+  }
+}
 </style>
