@@ -62,7 +62,7 @@
                   v-if="store.sortedNotifications.length > 0"
                   type="button"
                   class="notif-clear-all"
-                  @click="store.clearAllNotifications()"
+                  @click="clearAllNotifications()"
                 >
                   Hapus semua
                 </button>
@@ -85,7 +85,7 @@
                   type="button"
                   class="notif-item-delete"
                   aria-label="Hapus notifikasi"
-                  @click.stop="store.deleteNotification(notif.id)"
+                  @click.stop="deleteNotification(notif.id)"
                 >
                   <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
                     <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
@@ -125,9 +125,27 @@ import AdminSidebar from "../components/AdminSidebar.vue";
 import AppHeader from "../components/AppHeader.vue";
 import { useAuthStore } from "../stores/authStore";
 import { useSurveyStore } from "../stores/surveyStore";
+import { useToastStore } from "../stores/toastStore";
 
 const route = useRoute();
 const store = useSurveyStore();
+const toast = useToastStore();
+
+async function deleteNotification(id) {
+  try {
+    await store.deleteNotification(id);
+  } catch (err) {
+    toast.show(err.message || "Gagal menghapus notifikasi.", "error");
+  }
+}
+
+async function clearAllNotifications() {
+  try {
+    await store.clearAllNotifications();
+  } catch (err) {
+    toast.show(err.message || "Gagal menghapus notifikasi.", "error");
+  }
+}
 const authStore = useAuthStore();
 
 const mobileNavOpen = ref(false);

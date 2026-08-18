@@ -399,16 +399,30 @@ export const useSurveyStore = defineStore("survey", {
     },
 
     async deleteNotification(notificationId) {
-      const { error } = await supabase.from("notifications").delete().eq("id", notificationId);
+      const { data, error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error(
+          "Notifikasi tidak terhapus di database (kemungkinan migrasi 012_notifications_admin_delete.sql belum dijalankan)."
+        );
+      }
       this.notifications = this.notifications.filter((n) => n.id !== notificationId);
     },
 
     async clearAllNotifications() {
       const ids = this.notifications.map((n) => n.id);
       if (ids.length === 0) return;
-      const { error } = await supabase.from("notifications").delete().in("id", ids);
+      const { data, error } = await supabase.from("notifications").delete().in("id", ids).select("id");
       if (error) throw error;
+      if (!data || data.length < ids.length) {
+        throw new Error(
+          "Sebagian notifikasi tidak terhapus di database (kemungkinan migrasi 012_notifications_admin_delete.sql belum dijalankan)."
+        );
+      }
       this.notifications = [];
     },
 
