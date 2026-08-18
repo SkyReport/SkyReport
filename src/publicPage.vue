@@ -44,9 +44,10 @@
           <div class="field">
             <label class="field-label" for="survey">Pilih survey</label>
             <div class="input-wrap">
-              <svg class="input-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
-                <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-                <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <svg class="input-icon" width="19" height="19" viewBox="0 0 20 20" fill="none">
+                <rect x="5" y="4" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <path d="M8 3.5h4a1 1 0 0 1 1 1V5H7v-.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M7.5 8.5h5M7.5 11h5M7.5 13.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
               <select id="survey" v-model="selectedSurveyId" class="select">
                 <option v-for="survey in surveys" :key="survey.id" :value="survey.id">

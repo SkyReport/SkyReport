@@ -22,8 +22,9 @@
 
         <div class="survey-filter">
           <svg class="survey-filter-icon" width="14" height="14" viewBox="0 0 20 20" fill="none">
-            <rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-            <path d="M3 8h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <rect x="5" y="4" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M8 3.5h4a1 1 0 0 1 1 1V5H7v-.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M7.5 8.5h5M7.5 11h5M7.5 13.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
           <select v-model="selectedSurveyId" class="survey-filter-select">
             <option :value="null">Semua Survey</option>
