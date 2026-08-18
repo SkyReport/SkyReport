@@ -65,7 +65,7 @@
                 <td class="cell-name">{{ sub.nama }}</td>
                 <td class="cell-muted">{{ surveyNameFor(sub) }}</td>
                 <td class="cell-muted">{{ shortDeptName(sub.departemen) }}</td>
-                <td>{{ sub.tanggal }}</td>
+                <td>{{ formatTanggal(sub.tanggal) }}</td>
                 <td class="cell-muted">{{ submissionTime(sub) || "-" }}</td>
                 <td class="col-action">
                   <div class="action-cell">
@@ -145,6 +145,11 @@ const store = useSurveyStore();
 const toast = useToastStore();
 
 onMounted(() => store.ensureBaseData());
+
+function formatTanggal(isoDate) {
+  const [year, month, day] = isoDate.split("-");
+  return `${day}-${month}-${year}`;
+}
 
 const search = ref("");
 const selectedSurveyId = ref(null);
