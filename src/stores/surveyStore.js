@@ -298,18 +298,19 @@ export const useSurveyStore = defineStore("survey", {
         throw new Error(`Gagal mengunggah bukti: ${uploadError.message}`);
       }
 
-      const { data, error } = await supabase
-        .from("submissions")
-        .insert({
-          nama,
-          tanggal,
-          survey_id: surveyId,
-          jenis_pegawai: jenisPegawai,
-          departemen,
-          file_bukti: path,
-        })
-        .select()
-        .single();
+      // No .select() here — the public submissions_insert_public RLS policy
+      // only grants anon INSERT, not SELECT (that's admin-only), so asking
+      // Postgrest to read the row back after insert would fail RLS even
+      // though the insert itself succeeded. Build the local copy from what
+      // we already know instead of round-tripping a read.
+      const { error } = await supabase.from("submissions").insert({
+        nama,
+        tanggal,
+        survey_id: surveyId,
+        jenis_pegawai: jenisPegawai,
+        departemen,
+        file_bukti: path,
+      });
 
       if (error) {
         // The DB trigger raises the quota/inactive-survey exceptions in
@@ -318,7 +319,16 @@ export const useSurveyStore = defineStore("survey", {
         throw new Error(error.message);
       }
 
-      const submission = mapSubmission(data);
+      const submission = mapSubmission({
+        id: `local-${Date.now()}`,
+        nama,
+        tanggal,
+        survey_id: surveyId,
+        jenis_pegawai: jenisPegawai,
+        departemen,
+        file_bukti: path,
+        created_at: new Date().toISOString(),
+      });
       this.submissions.push(submission);
       this.lastSubmission = submission;
       return submission;
