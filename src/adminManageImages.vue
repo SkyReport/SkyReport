@@ -86,12 +86,14 @@
               <tr v-if="expandedId === sub.id" class="image-row">
                 <td colspan="7">
                   <p v-if="imageLoadingId === sub.id" class="loading-text">Memuat bukti...</p>
-                  <img
-                    v-else-if="imageUrls[sub.id]"
-                    class="preview-image"
-                    :src="imageUrls[sub.id]"
-                    :alt="`Bukti ${sub.nama} ${sub.tanggal}`"
-                  />
+                  <template v-else-if="imageUrls[sub.id]">
+                    <img
+                      class="preview-image"
+                      :src="imageUrls[sub.id]"
+                      :alt="`Bukti ${sub.nama} ${sub.tanggal}`"
+                    />
+                    <p v-if="imageSizes[sub.id]" class="image-size-text">{{ imageSizes[sub.id] }}</p>
+                  </template>
                   <p v-else class="loading-text">Gagal memuat bukti.</p>
                 </td>
               </tr>
@@ -216,8 +218,16 @@ const pagedSubmissions = computed(() => filteredSubmissions.value.slice(pageStar
 
 const expandedId = ref(null);
 const imageUrls = ref({});
+const imageSizes = ref({});
 const imageLoadingId = ref(null);
 const deletingId = ref(null);
+
+function formatFileSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 
 async function toggleImage(submission) {
   if (expandedId.value === submission.id) {
@@ -235,6 +245,15 @@ async function toggleImage(submission) {
     .createSignedUrl(submission.fileBukti, 300);
   if (!error) {
     imageUrls.value = { ...imageUrls.value, [submission.id]: data.signedUrl };
+    try {
+      const res = await fetch(data.signedUrl, { method: "HEAD" });
+      const size = Number(res.headers.get("content-length"));
+      if (size) {
+        imageSizes.value = { ...imageSizes.value, [submission.id]: formatFileSize(size) };
+      }
+    } catch {
+      // ignore, size is just a nice-to-have
+    }
   }
   imageLoadingId.value = null;
 }
@@ -267,6 +286,9 @@ async function performDeleteSubmission() {
     const updatedUrls = { ...imageUrls.value };
     delete updatedUrls[submission.id];
     imageUrls.value = updatedUrls;
+    const updatedSizes = { ...imageSizes.value };
+    delete updatedSizes[submission.id];
+    imageSizes.value = updatedSizes;
     toast.show("Data submission berhasil dihapus.", "success");
   } catch (err) {
     toast.show(err.message || "Gagal menghapus data.", "error");
@@ -311,6 +333,7 @@ async function performDeleteAll() {
     const deletedCount = await store.deleteAllSubmissionsForSurvey(selectedSurveyId.value);
     expandedId.value = null;
     imageUrls.value = {};
+    imageSizes.value = {};
     toast.show(`${deletedCount} data submission berhasil dihapus.`, "success");
   } catch (err) {
     toast.show(err.message || "Gagal menghapus data.", "error");
@@ -574,6 +597,13 @@ async function performDeleteAll() {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
+}
+
+.image-size-text {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 8px;
 }
 
 .loading-text {
