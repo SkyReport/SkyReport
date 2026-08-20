@@ -2,10 +2,10 @@
   <div class="manage-page">
     <div class="page-heading">
       <div>
-        <h1 class="page-title">Delete Image</h1>
+        <h1 class="page-title">Delete Data</h1>
         <p class="page-subtitle">
-          Kelola dan hapus foto bukti survei yang tersimpan untuk menghemat penyimpanan. Data
-          submission (kuota pengisian) tidak ikut terhapus — hanya file fotonya.
+          Kelola dan hapus foto bukti survei yang tersimpan untuk menghemat penyimpanan, atau hapus
+          seluruh data submission (termasuk data pegawai yang sudah mengisi) untuk satu survey.
         </p>
       </div>
     </div>
@@ -39,9 +39,9 @@
           class="delete-all-button"
           :disabled="!selectedSurveyId || deletingAll"
           :title="!selectedSurveyId ? 'Pilih satu survey terlebih dahulu' : ''"
-          @click="confirmDeleteAll"
+          @click="openDeleteAllConfirm"
         >
-          {{ deletingAll ? "Menghapus..." : "Hapus Semua Gambar" }}
+          {{ deletingAll ? "Menghapus..." : "Hapus Data" }}
         </button>
       </div>
 
@@ -69,20 +69,17 @@
                 <td class="cell-muted">{{ submissionTime(sub) || "-" }}</td>
                 <td class="col-action">
                   <div class="action-cell">
-                    <template v-if="sub.fileBukti">
-                      <button type="button" class="view-toggle" @click="toggleImage(sub)">
-                        {{ expandedId === sub.id ? "Tutup" : "Lihat Bukti" }}
-                      </button>
-                      <button
-                        type="button"
-                        class="delete-button"
-                        :disabled="deletingId === sub.id"
-                        @click="confirmDeleteImage(sub)"
-                      >
-                        {{ deletingId === sub.id ? "Menghapus..." : "Hapus Gambar" }}
-                      </button>
-                    </template>
-                    <span v-else class="deleted-label">Gambar dihapus</span>
+                    <button v-if="sub.fileBukti" type="button" class="view-toggle" @click="toggleImage(sub)">
+                      {{ expandedId === sub.id ? "Tutup" : "Lihat Bukti" }}
+                    </button>
+                    <button
+                      type="button"
+                      class="delete-button"
+                      :disabled="deletingId === sub.id"
+                      @click="confirmDeleteSubmission(sub)"
+                    >
+                      {{ deletingId === sub.id ? "Menghapus..." : "Hapus Data" }}
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -131,11 +128,36 @@
         </div>
       </div>
     </div>
+
+    <ConfirmDialog
+      :visible="showDeleteAllConfirm"
+      title="Hapus semua data submission?"
+      :message="deleteAllConfirmMessage"
+      :note="DELETE_ALL_CONFIRM_NOTE"
+      confirm-text="Ya, Hapus"
+      cancel-text="Batal"
+      danger
+      @confirm="performDeleteAll"
+      @cancel="showDeleteAllConfirm = false"
+    />
+
+    <ConfirmDialog
+      :visible="showDeleteOneConfirm"
+      title="Hapus data submission ini?"
+      :message="deleteOneConfirmMessage"
+      :note="DELETE_ONE_CONFIRM_NOTE"
+      confirm-text="Ya, Hapus"
+      cancel-text="Batal"
+      danger
+      @confirm="performDeleteSubmission"
+      @cancel="showDeleteOneConfirm = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
+import ConfirmDialog from "./components/ConfirmDialog.vue";
 import { BUKTI_BUCKET, supabase } from "./lib/supabaseClient";
 import { shortDeptName } from "./orgStructure";
 import { useSurveyStore } from "./stores/surveyStore";
@@ -217,55 +239,81 @@ async function toggleImage(submission) {
   imageLoadingId.value = null;
 }
 
-async function confirmDeleteImage(submission) {
-  const ok = window.confirm(
-    `Hapus gambar bukti ${submission.nama} tanggal ${submission.tanggal}? Data submission (kuota pengisian) tetap tersimpan, hanya file fotonya yang dihapus dari storage.`
-  );
-  if (!ok) return;
+const showDeleteOneConfirm = ref(false);
+const pendingDeleteSubmission = ref(null);
+
+const deleteOneConfirmMessage = computed(() => {
+  const submission = pendingDeleteSubmission.value;
+  if (!submission) return "";
+  return `Hapus data submission ${submission.nama} tanggal ${formatTanggal(submission.tanggal)}?\n\nFoto bukti dan baris datanya akan terhapus sekaligus, dan kuota pengisian untuk survey ini ikut ter-reset.`;
+});
+
+const DELETE_ONE_CONFIRM_NOTE = "Tindakan ini tidak bisa dibatalkan.";
+
+function confirmDeleteSubmission(submission) {
+  pendingDeleteSubmission.value = submission;
+  showDeleteOneConfirm.value = true;
+}
+
+async function performDeleteSubmission() {
+  const submission = pendingDeleteSubmission.value;
+  showDeleteOneConfirm.value = false;
+  if (!submission) return;
 
   deletingId.value = submission.id;
   try {
-    await store.deleteSubmissionImage(submission.id);
+    await store.deleteSubmission(submission.id);
     if (expandedId.value === submission.id) expandedId.value = null;
     const updatedUrls = { ...imageUrls.value };
     delete updatedUrls[submission.id];
     imageUrls.value = updatedUrls;
-    toast.show("Gambar bukti berhasil dihapus.", "success");
+    toast.show("Data submission berhasil dihapus.", "success");
   } catch (err) {
-    toast.show(err.message || "Gagal menghapus gambar.", "error");
+    toast.show(err.message || "Gagal menghapus data.", "error");
   } finally {
     deletingId.value = null;
+    pendingDeleteSubmission.value = null;
   }
 }
 
 const deletingAll = ref(false);
+const showDeleteAllConfirm = ref(false);
 
-async function confirmDeleteAll() {
+const deleteAllConfirmMessage = computed(() => {
+  if (!selectedSurveyId.value) return "";
+  const surveyName = store.findSurvey(selectedSurveyId.value)?.nama ?? "survey ini";
+  const count = store.submissions.filter((s) => s.surveyId === selectedSurveyId.value).length;
+  return [
+    `Anda akan menghapus ${count} data submission untuk survey "${surveyName}".`,
+    "Foto bukti dan baris data pegawai akan terhapus sekaligus, dan kuota pengisian survey ini ikut ter-reset.",
+  ].join("\n\n");
+});
+
+const DELETE_ALL_CONFIRM_NOTE =
+  "Tindakan ini tidak bisa dibatalkan. Pastikan Anda sudah export ke PDF atau Excel sebelum melanjutkan.";
+
+function openDeleteAllConfirm() {
   if (!selectedSurveyId.value) return;
 
-  const surveyName = store.findSurvey(selectedSurveyId.value)?.nama ?? "survey ini";
-  const count = store.submissions.filter(
-    (s) => s.surveyId === selectedSurveyId.value && s.fileBukti
-  ).length;
-
+  const count = store.submissions.filter((s) => s.surveyId === selectedSurveyId.value).length;
   if (count === 0) {
-    toast.show("Tidak ada gambar untuk dihapus pada survey ini.", "info");
+    toast.show("Tidak ada data untuk dihapus pada survey ini.", "info");
     return;
   }
 
-  const ok = window.confirm(
-    `Hapus SEMUA ${count} gambar bukti untuk "${surveyName}"? Data submission (kuota pengisian) tetap tersimpan, hanya file fotonya yang dihapus dari storage. Tindakan ini tidak bisa dibatalkan.`
-  );
-  if (!ok) return;
+  showDeleteAllConfirm.value = true;
+}
 
+async function performDeleteAll() {
+  showDeleteAllConfirm.value = false;
   deletingAll.value = true;
   try {
-    const deletedCount = await store.deleteAllImagesForSurvey(selectedSurveyId.value);
+    const deletedCount = await store.deleteAllSubmissionsForSurvey(selectedSurveyId.value);
     expandedId.value = null;
     imageUrls.value = {};
-    toast.show(`${deletedCount} gambar bukti berhasil dihapus.`, "success");
+    toast.show(`${deletedCount} data submission berhasil dihapus.`, "success");
   } catch (err) {
-    toast.show(err.message || "Gagal menghapus gambar.", "error");
+    toast.show(err.message || "Gagal menghapus data.", "error");
   } finally {
     deletingAll.value = false;
   }
@@ -510,12 +558,6 @@ async function confirmDeleteAll() {
 .delete-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.deleted-label {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--color-text-muted);
 }
 
 .image-row td {

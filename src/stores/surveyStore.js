@@ -334,53 +334,52 @@ export const useSurveyStore = defineStore("survey", {
       return submission;
     },
 
-    // Deletes just the evidence photo (storage object) and clears
-    // file_bukti on the submission — the submission row itself stays, so
-    // participation counts/quota are unaffected. Used by admins to free up
-    // storage space without losing the record of who submitted when.
-    async deleteSubmissionImage(submissionId) {
+    // Deletes one submission row entirely (plus its evidence photo, if
+    // any) — used by the per-row "Hapus Data" button. Drops that employee's
+    // participation record for this survey, so their quota resets.
+    async deleteSubmission(submissionId) {
       const submission = this.submissions.find((s) => s.id === submissionId);
-      if (!submission?.fileBukti) return;
+      if (!submission) return;
 
-      const { error: removeError } = await supabase.storage
-        .from(BUKTI_BUCKET)
-        .remove([submission.fileBukti]);
-      if (removeError) {
-        throw new Error(`Gagal menghapus file: ${removeError.message}`);
+      if (submission.fileBukti) {
+        const { error: removeError } = await supabase.storage
+          .from(BUKTI_BUCKET)
+          .remove([submission.fileBukti]);
+        if (removeError) {
+          throw new Error(`Gagal menghapus file: ${removeError.message}`);
+        }
       }
 
-      const { error: updateError } = await supabase
-        .from("submissions")
-        .update({ file_bukti: "" })
-        .eq("id", submissionId);
-      if (updateError) throw new Error(updateError.message);
+      const { error: deleteError } = await supabase.from("submissions").delete().eq("id", submissionId);
+      if (deleteError) throw new Error(deleteError.message);
 
-      submission.fileBukti = "";
+      this.submissions = this.submissions.filter((s) => s.id !== submissionId);
     },
 
-    // Bulk version of deleteSubmissionImage, scoped to one survey — used by
-    // the "Hapus Semua Gambar" button so admins can clear out an entire
-    // survey's evidence photos in one go instead of one-by-one.
-    async deleteAllImagesForSurvey(surveyId) {
-      const targets = this.submissions.filter((s) => s.surveyId === surveyId && s.fileBukti);
+    // Deletes the submission rows themselves (not just the photos) for one
+    // survey — used by the "Hapus Data" button when the admin wants to wipe
+    // out every employee's entry for that survey, not merely free up
+    // storage. Also drops quota/participation history, so employees could
+    // submit again from scratch.
+    async deleteAllSubmissionsForSurvey(surveyId) {
+      const targets = this.submissions.filter((s) => s.surveyId === surveyId);
       if (targets.length === 0) return 0;
 
-      const paths = targets.map((s) => s.fileBukti);
-      const { error: removeError } = await supabase.storage.from(BUKTI_BUCKET).remove(paths);
-      if (removeError) {
-        throw new Error(`Gagal menghapus file: ${removeError.message}`);
+      const paths = targets.filter((s) => s.fileBukti).map((s) => s.fileBukti);
+      if (paths.length > 0) {
+        const { error: removeError } = await supabase.storage.from(BUKTI_BUCKET).remove(paths);
+        if (removeError) {
+          throw new Error(`Gagal menghapus file: ${removeError.message}`);
+        }
       }
 
-      const ids = targets.map((s) => s.id);
-      const { error: updateError } = await supabase
+      const { error: deleteError } = await supabase
         .from("submissions")
-        .update({ file_bukti: "" })
-        .in("id", ids);
-      if (updateError) throw new Error(updateError.message);
+        .delete()
+        .eq("survey_id", surveyId);
+      if (deleteError) throw new Error(deleteError.message);
 
-      targets.forEach((s) => {
-        s.fileBukti = "";
-      });
+      this.submissions = this.submissions.filter((s) => s.surveyId !== surveyId);
 
       return targets.length;
     },

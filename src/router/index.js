@@ -61,7 +61,7 @@ const routes = [
         path: "hapus-gambar",
         name: "admin-manage-images",
         component: () => import("../adminManageImages.vue"),
-        meta: { title: "Delete Image" },
+        meta: { title: "Delete Data" },
       },
     ],
   },

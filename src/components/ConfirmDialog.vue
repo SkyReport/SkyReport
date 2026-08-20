@@ -3,8 +3,23 @@
     <transition name="confirm-fade">
       <div v-if="visible" class="confirm-overlay" @click.self="$emit('cancel')">
         <div class="confirm-card" role="alertdialog" aria-modal="true">
-          <h2 class="confirm-title">{{ title }}</h2>
+          <div class="confirm-heading">
+            <span v-if="danger" class="confirm-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M10 2.2 18.5 17H1.5L10 2.2Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+                <path d="M10 7.8v3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                <circle cx="10" cy="14.2" r="0.9" fill="currentColor" />
+              </svg>
+            </span>
+            <h2 class="confirm-title">{{ title }}</h2>
+          </div>
           <p class="confirm-message">{{ message }}</p>
+          <p v-if="note" class="confirm-note">{{ note }}</p>
           <div class="confirm-actions">
             <button type="button" class="confirm-btn confirm-btn-secondary" @click="$emit('cancel')">
               {{ cancelText }}
@@ -29,6 +44,7 @@ defineProps({
   visible: { type: Boolean, default: false },
   title: { type: String, default: "Konfirmasi" },
   message: { type: String, default: "Apakah Anda yakin?" },
+  note: { type: String, default: "" },
   confirmText: { type: String, default: "Ya" },
   cancelText: { type: String, default: "Batal" },
   danger: { type: Boolean, default: false },
@@ -59,8 +75,21 @@ defineEmits(["confirm", "cancel"]);
   font-family: var(--font-sans);
 }
 
+.confirm-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.confirm-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-danger);
+}
+
 .confirm-title {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -72,6 +101,19 @@ defineEmits(["confirm", "cancel"]);
   font-size: 14px;
   line-height: 1.5;
   color: var(--color-text-muted);
+  white-space: pre-line;
+}
+
+.confirm-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-danger-bg);
+  border: 1px solid rgba(217, 45, 32, 0.2);
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .confirm-actions {
