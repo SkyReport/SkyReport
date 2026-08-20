@@ -14,7 +14,8 @@
     "jspdf-autotable": "^5.0.8",
     "pinia": "^4.0.2",
     "vue": "rc",
-    "vue-router": "^4.6.4"
+    "vue-router": "^4.6.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",

@@ -8,13 +8,22 @@
           kepuasan di seluruh departemen InJourney Airports.
         </p>
       </div>
-      <button type="button" class="btn-export" :disabled="noSurveySelected" @click="exportToPdf">
-        <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
-          <path d="M10 3v9m0 0 3.5-3.5M10 12l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M4 14v2a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 16 16v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-        </svg>
-        Export ke PDF
-      </button>
+      <div class="export-actions">
+        <button type="button" class="btn-export" :disabled="noSurveySelected" @click="exportToPdf">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3v9m0 0 3.5-3.5M10 12l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M4 14v2a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 16 16v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          Export ke PDF
+        </button>
+        <button type="button" class="btn-export btn-export-excel" :disabled="noSurveySelected" @click="exportToExcel">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3v9m0 0 3.5-3.5M10 12l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M4 14v2a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 16 16v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          Export ke Excel
+        </button>
+      </div>
     </div>
 
     <div class="report-main">
@@ -374,6 +383,7 @@
 <script setup>
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { ORG_CHILDREN_BY_PARENT, ORG_PARENT_KEYS, shortDeptName } from "./orgStructure";
@@ -731,6 +741,98 @@ function exportToPdf() {
   const dateStamp = new Date().toISOString().slice(0, 10);
   doc.save(`laporan-survey-${slug}-${dateStamp}.pdf`);
 }
+
+function buildExcelSheet(labelHeader, rows, totals, keyFormatter) {
+  const header1 = ["No", labelHeader, "Pegawai Organik", "", "", "", "Pegawai TAD", "", "", "", "Total", "", "", "", ""];
+  const header2 = [
+    "", "",
+    "Jumlah", "Target", "Voting", "Gap",
+    "Jumlah", "Target", "Voting", "Gap",
+    "Jumlah", "Target", "Voting", "Gap", "Persentase",
+  ];
+
+  const body = rows.map((row, index) => [
+    index + 1,
+    keyFormatter(row.key),
+    row.pegawaiOrganik,
+    row.targetOrganik,
+    row.pengisianOrganik,
+    row.gapOrganik,
+    row.pegawaiNonOrganik,
+    row.targetNonOrganik,
+    row.pengisianNonOrganik,
+    row.gapNonOrganik,
+    row.pegawaiTotal,
+    row.targetTotal,
+    row.pengisianTotal,
+    row.gapTotal,
+    row.persenTotal / 100,
+  ]);
+
+  body.push([
+    "Total Akumulasi", "",
+    totals.pegawaiOrganik,
+    totals.targetOrganik,
+    totals.pengisianOrganik,
+    totals.gapOrganik,
+    totals.pegawaiNonOrganik,
+    totals.targetNonOrganik,
+    totals.pengisianNonOrganik,
+    totals.gapNonOrganik,
+    totals.pegawaiTotal,
+    totals.targetTotal,
+    totals.pengisianTotal,
+    totals.gapTotal,
+    totals.persenTotal / 100,
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([header1, header2, ...body]);
+  const totalRowIndex = body.length + 1;
+
+  ws["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
+    { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } },
+    { s: { r: 0, c: 2 }, e: { r: 0, c: 5 } },
+    { s: { r: 0, c: 6 }, e: { r: 0, c: 9 } },
+    { s: { r: 0, c: 10 }, e: { r: 0, c: 14 } },
+    { s: { r: totalRowIndex, c: 0 }, e: { r: totalRowIndex, c: 1 } },
+  ];
+
+  ws["!cols"] = [{ wch: 5 }, { wch: 24 }, ...Array(12).fill({ wch: 11 }), { wch: 12 }];
+
+  const GAP_COLS = [5, 9, 13];
+  for (let r = 2; r < 2 + body.length; r++) {
+    for (const c of GAP_COLS) {
+      const cell = ws[XLSX.utils.encode_cell({ r, c })];
+      if (cell) cell.z = "+0;-0;0";
+    }
+    const percentCell = ws[XLSX.utils.encode_cell({ r, c: 14 })];
+    if (percentCell) percentCell.z = "0.0%";
+  }
+
+  return ws;
+}
+
+function exportToExcel() {
+  if (noSurveySelected.value) return;
+  const surveyLabel = selectedSurveyFilter.value.nama;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(
+    wb,
+    buildExcelSheet("Tanggal", dateTable.rows.value, dateTable.totals.value, formatDate),
+    "Per Tanggal"
+  );
+  XLSX.utils.book_append_sheet(
+    wb,
+    buildExcelSheet("Divisi", deptTable.rows.value, deptTable.totals.value, (key) => key),
+    "Per Divisi"
+  );
+
+  const slug = surveyLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `laporan-survey-${slug}-${dateStamp}.xlsx`);
+}
 </script>
 
 <style scoped>
@@ -746,6 +848,13 @@ function exportToPdf() {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.export-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .btn-export {
@@ -769,6 +878,16 @@ function exportToPdf() {
 .btn-export:hover {
   background-color: var(--color-primary-dark);
   box-shadow: 0 3px 10px rgba(0, 93, 172, 0.4);
+}
+
+.btn-export-excel {
+  background-color: var(--color-success);
+  box-shadow: 0 2px 6px rgba(18, 183, 106, 0.3);
+}
+
+.btn-export-excel:hover {
+  background-color: #0e9c5a;
+  box-shadow: 0 3px 10px rgba(18, 183, 106, 0.4);
 }
 
 .page-title {
@@ -1207,6 +1326,11 @@ function exportToPdf() {
 @media (max-width: 640px) {
   .page-heading {
     flex-wrap: wrap;
+  }
+
+  .export-actions {
+    width: 100%;
+    flex-direction: column;
   }
 
   .btn-export {
