@@ -36,15 +36,7 @@
 
         <div class="card-heading">
           <div class="brand-mark">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M10 2 17 6v8l-7 4-7-4V6l7-4Z"
-                stroke="white"
-                stroke-width="1.4"
-                stroke-linejoin="round"
-              />
-              <path d="M10 2v16M3 6l14 8M17 6 3 14" stroke="white" stroke-width="1" opacity="0.45" />
-            </svg>
+            <img src="/logo_skyvote.jpeg" alt="SkyVote" class="brand-mark-img" />
           </div>
           <h1 class="card-title">Login Admin</h1>
           <p class="card-subtitle">Masuk untuk mengakses SkyVote.</p>
@@ -238,12 +230,16 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto 4px;
+}
+
+.brand-mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: 13px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-cyan-strong) 100%);
-  box-shadow: 0 6px 16px rgba(0, 93, 172, 0.35);
 }
 
 .card.shake {
