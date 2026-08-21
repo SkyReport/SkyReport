@@ -31,7 +31,6 @@
       </div>
       <div class="brand-text">
         <span class="brand-title">SkyVote</span>
-        <span class="brand-subtitle">InJourney Management</span>
       </div>
     </div>
 
@@ -209,7 +208,7 @@ async function handleLogout() {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 22px 20px;
   border-bottom: 1px solid var(--color-sidebar-border);
 }
@@ -218,37 +217,43 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   flex-shrink: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-accent-cyan-strong) 100%);
+  padding: 2px;
+  box-shadow: 0 0 0 1px rgba(92, 233, 254, 0.25), 0 6px 16px rgba(0, 93, 172, 0.35);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.sidebar-brand:hover .brand-mark {
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 0 0 1px rgba(92, 233, 254, 0.4), 0 8px 20px rgba(0, 93, 172, 0.45);
 }
 
 .brand-mark-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 10px;
 }
 
 .brand-text {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
   min-width: 0;
 }
 
 .brand-title {
-  color: #ffffff;
+  background: linear-gradient(90deg, #ffffff 0%, var(--color-accent-cyan-strong) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.brand-subtitle {
-  color: var(--color-sidebar-text-muted);
-  font-size: 11.5px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 

@@ -482,8 +482,8 @@ async function handleSaveDraft() {
 }
 
 .btn-primary {
-  height: 40px;
-  padding: 0 24px;
+  min-height: 40px;
+  padding: 10px 24px;
   border: none;
   border-radius: var(--radius-md);
   background-color: var(--color-primary);
@@ -500,8 +500,8 @@ async function handleSaveDraft() {
 }
 
 .btn-outline {
-  height: 40px;
-  padding: 0 20px;
+  min-height: 40px;
+  padding: 10px 20px;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -518,8 +518,8 @@ async function handleSaveDraft() {
 }
 
 .btn-secondary {
-  height: 40px;
-  padding: 0 20px;
+  min-height: 40px;
+  padding: 10px 20px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
@@ -530,6 +530,7 @@ async function handleSaveDraft() {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   transition: background-color 0.15s ease;
 }
 
@@ -547,11 +548,12 @@ async function handleSaveDraft() {
   }
 
   .form-footer {
-    justify-content: stretch;
+    flex-direction: column-reverse;
+    align-items: stretch;
   }
 
   .form-footer > * {
-    flex: 1;
+    width: 100%;
     justify-content: center;
     text-align: center;
   }

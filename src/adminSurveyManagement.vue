@@ -24,7 +24,7 @@
         </div>
 
         <div class="filter-wrap">
-          <button type="button" class="btn-filter" @click.stop="filterOpen = !filterOpen">
+          <button ref="filterBtnRef" type="button" class="btn-filter" @click.stop="toggleFilter">
             <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
               <path
                 d="M3 5h14M6 10h8M9 15h2"
@@ -37,16 +37,18 @@
             <span v-if="statusFilter.length" class="filter-count">({{ statusFilter.length }})</span>
           </button>
 
-          <div v-if="filterOpen" class="filter-popover" @click.stop>
-            <span class="filter-popover-label">Status Survey</span>
-            <label v-for="opt in statusOptions" :key="opt" class="filter-checkbox">
-              <input type="checkbox" :value="opt" v-model="statusFilter" />
-              {{ opt }}
-            </label>
-            <button type="button" class="filter-reset" @click="statusFilter = []">
-              Reset filter
-            </button>
-          </div>
+          <Teleport to="body">
+            <div v-if="filterOpen" class="filter-popover" :style="filterPopoverStyle" @click.stop>
+              <span class="filter-popover-label">Status Survey</span>
+              <label v-for="opt in statusOptions" :key="opt" class="filter-checkbox">
+                <input type="checkbox" :value="opt" v-model="statusFilter" />
+                {{ opt }}
+              </label>
+              <button type="button" class="filter-reset" @click="statusFilter = []">
+                Reset filter
+              </button>
+            </div>
+          </Teleport>
         </div>
       </div>
 
@@ -191,7 +193,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useSurveyStore } from "./stores/surveyStore";
 import { useToastStore } from "./stores/toastStore";
 
@@ -200,6 +202,33 @@ const toast = useToastStore();
 
 const search = ref("");
 const filterOpen = ref(false);
+const filterBtnRef = ref(null);
+const filterPopoverStyle = ref({});
+
+const POPOVER_WIDTH = 200;
+const POPOVER_MARGIN = 16;
+
+function positionFilterPopover() {
+  const btn = filterBtnRef.value;
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const width = Math.min(POPOVER_WIDTH, window.innerWidth - POPOVER_MARGIN * 2);
+  let left = rect.right - width;
+  left = Math.max(POPOVER_MARGIN, Math.min(left, window.innerWidth - width - POPOVER_MARGIN));
+  filterPopoverStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${left}px`,
+    width: `${width}px`,
+  };
+}
+
+async function toggleFilter() {
+  filterOpen.value = !filterOpen.value;
+  if (filterOpen.value) {
+    await nextTick();
+    positionFilterPopover();
+  }
+}
 
 function closeFilterOnOutsideClick() {
   filterOpen.value = false;
@@ -207,9 +236,13 @@ function closeFilterOnOutsideClick() {
 
 onMounted(() => {
   document.addEventListener("click", closeFilterOnOutsideClick);
+  window.addEventListener("resize", positionFilterPopover);
   store.ensureBaseData();
 });
-onBeforeUnmount(() => document.removeEventListener("click", closeFilterOnOutsideClick));
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeFilterOnOutsideClick);
+  window.removeEventListener("resize", positionFilterPopover);
+});
 const statusOptions = ["Draft", "Terjadwal", "Aktif", "Selesai"];
 const statusFilter = ref([]);
 const page = ref(1);
@@ -410,10 +443,7 @@ async function confirmDelete(survey) {
 }
 
 .filter-popover {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  width: 200px;
+  position: fixed;
   display: flex;
   flex-direction: column;
   gap: 8px;
