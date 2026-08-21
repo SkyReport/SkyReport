@@ -271,11 +271,8 @@ function formatPeriode(survey) {
   if (!survey.tanggalMulai || !survey.tanggalSelesai) return "Belum dijadwalkan";
   const start = new Date(survey.tanggalMulai);
   const end = new Date(survey.tanggalSelesai);
-  const dayMonth = (d) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
-  const sameYear = start.getFullYear() === end.getFullYear();
-  const startLabel = sameYear ? dayMonth(start) : `${dayMonth(start)}, ${start.getFullYear()}`;
-  const endLabel = `${dayMonth(end)}, ${end.getFullYear()}`;
-  return `${startLabel} - ${endLabel}`;
+  const format = (d) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  return `${format(start)} - ${format(end)}`;
 }
 
 function submissionCount(survey) {
