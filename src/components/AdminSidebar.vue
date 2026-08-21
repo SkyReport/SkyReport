@@ -339,6 +339,9 @@ async function handleLogout() {
     transform: translateX(-100%);
     box-shadow: none;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: var(--color-sidebar-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .sidebar.sidebar-open {
