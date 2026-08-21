@@ -72,14 +72,6 @@
                     <button v-if="sub.fileBukti" type="button" class="view-toggle" @click="toggleImage(sub)">
                       {{ expandedId === sub.id ? "Tutup" : "Lihat Bukti" }}
                     </button>
-                    <button
-                      type="button"
-                      class="delete-button"
-                      :disabled="deletingId === sub.id"
-                      @click="confirmDeleteSubmission(sub)"
-                    >
-                      {{ deletingId === sub.id ? "Menghapus..." : "Hapus Data" }}
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -141,18 +133,6 @@
       danger
       @confirm="performDeleteAll"
       @cancel="showDeleteAllConfirm = false"
-    />
-
-    <ConfirmDialog
-      :visible="showDeleteOneConfirm"
-      title="Hapus data submission ini?"
-      :message="deleteOneConfirmMessage"
-      :note="DELETE_ONE_CONFIRM_NOTE"
-      confirm-text="Ya, Hapus"
-      cancel-text="Batal"
-      danger
-      @confirm="performDeleteSubmission"
-      @cancel="showDeleteOneConfirm = false"
     />
   </div>
 </template>
@@ -220,7 +200,6 @@ const expandedId = ref(null);
 const imageUrls = ref({});
 const imageSizes = ref({});
 const imageLoadingId = ref(null);
-const deletingId = ref(null);
 
 function formatFileSize(bytes) {
   if (!bytes && bytes !== 0) return "";
@@ -256,46 +235,6 @@ async function toggleImage(submission) {
     }
   }
   imageLoadingId.value = null;
-}
-
-const showDeleteOneConfirm = ref(false);
-const pendingDeleteSubmission = ref(null);
-
-const deleteOneConfirmMessage = computed(() => {
-  const submission = pendingDeleteSubmission.value;
-  if (!submission) return "";
-  return `Hapus data submission ${submission.nama} tanggal ${formatTanggal(submission.tanggal)}?\n\nFoto bukti dan baris datanya akan terhapus sekaligus, dan kuota pengisian untuk survey ini ikut ter-reset.`;
-});
-
-const DELETE_ONE_CONFIRM_NOTE = "Tindakan ini tidak bisa dibatalkan.";
-
-function confirmDeleteSubmission(submission) {
-  pendingDeleteSubmission.value = submission;
-  showDeleteOneConfirm.value = true;
-}
-
-async function performDeleteSubmission() {
-  const submission = pendingDeleteSubmission.value;
-  showDeleteOneConfirm.value = false;
-  if (!submission) return;
-
-  deletingId.value = submission.id;
-  try {
-    await store.deleteSubmission(submission.id);
-    if (expandedId.value === submission.id) expandedId.value = null;
-    const updatedUrls = { ...imageUrls.value };
-    delete updatedUrls[submission.id];
-    imageUrls.value = updatedUrls;
-    const updatedSizes = { ...imageSizes.value };
-    delete updatedSizes[submission.id];
-    imageSizes.value = updatedSizes;
-    toast.show("Data submission berhasil dihapus.", "success");
-  } catch (err) {
-    toast.show(err.message || "Gagal menghapus data.", "error");
-  } finally {
-    deletingId.value = null;
-    pendingDeleteSubmission.value = null;
-  }
 }
 
 const deletingAll = ref(false);

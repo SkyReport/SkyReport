@@ -1,11 +1,12 @@
 // Compress an evidence photo client-side before it's uploaded to Supabase
 // Storage. Recommended settings for this use case (survey evidence
 // screenshots/photos, not archival-quality images):
-//   - max dimension 1920px — plenty for reviewing on screen, phone
-//     screenshots/photos are routinely 3-4x larger than needed here
-//   - JPEG quality 0.8 — visually lossless for evidence review, typically
-//     shrinks a multi-MB screenshot down to a few hundred KB
-export async function compressImage(file, { maxDimension = 1920, quality = 0.8 } = {}) {
+//   - max dimension 1280px — still readable for reviewing evidence on
+//     screen, phone screenshots/photos are routinely several times larger
+//     than needed here
+//   - JPEG quality 0.65 — some visible softening on zoom, but keeps
+//     storage usage low across many submissions
+export async function compressImage(file, { maxDimension = 1280, quality = 0.65 } = {}) {
   if (!file.type.startsWith("image/") || file.type === "image/gif") {
     return file; // animated GIFs would lose their animation if re-encoded
   }
