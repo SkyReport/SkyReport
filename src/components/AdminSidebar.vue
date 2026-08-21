@@ -181,7 +181,6 @@ async function handleLogout() {
   height: 46px;
   fill: var(--color-accent-cyan-strong);
   animation: sidebar-flower-drift-2 26s linear infinite;
-  animation-delay: 6s;
 }
 
 @keyframes sidebar-flower-drift-1 {

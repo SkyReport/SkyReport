@@ -429,7 +429,6 @@ async function handleSubmit() {
   height: 60px;
   fill: var(--color-accent-cyan-strong);
   animation: flower-drift-2 32s linear infinite;
-  animation-delay: 8s;
 }
 
 @keyframes flower-drift-1 {
